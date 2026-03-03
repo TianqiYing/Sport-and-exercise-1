@@ -1,0 +1,7 @@
+feature,target,r2_in_sample,r2_time_split,n_used,note
+S_roll5_full,GF,0.03956596676722868,0.03195883941573796,2640,EVALUATION uses full windows only (min_periods=window).
+pWin_roll5_full,Pts,0.07223213393414007,0.06817680043116792,2640,EVALUATION uses full windows only (min_periods=window).
+S_roll8_full,GF,0.05355659024733639,0.0432919086496808,2400,EVALUATION uses full windows only (min_periods=window).
+pWin_roll8_full,Pts,0.07587836610263377,0.06937995926625551,2400,EVALUATION uses full windows only (min_periods=window).
+pWin_current,Pts,0.2222353318552166,0.16306032494798495,3040,Baseline using current fixture odds only.
+pWin_current,GF,0.1555270532503178,0.110148514645105,3040,Baseline using current fixture odds only.
