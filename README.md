@@ -6,4 +6,4 @@ Results: FTHG/FTAG, HTHG/HTAG
 Calculation: HS/AS, HST/AST, HC/AC     
             HF/AF, HY/AY, HR/AR       
 Gambling odds: Bet365, Betway, Pinnacle, William Hill etc.     
-            (Win/draw etc.)  
+            (Win/Draw etc.)  
