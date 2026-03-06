@@ -1,4 +1,5 @@
-Team.py: Data resources:  https://www.football-data.co.uk/englandm.php
+Team.py: 
+Data resources:  https://www.football-data.co.uk/englandm.php
 Data included:
 Information: Date, HomeTeam, AwayTeam, Referee           
 Results: FTHG/FTAG, HTHG/HTAG
@@ -8,7 +9,7 @@ Calculation: HS/AS, HST/AST, HC/AC
 Gambling odds: Bet365, Betway, Pinnacle, William Hill etc.     
             (Win/Draw etc.)  
 
-Data Analysis: Doing data analysis based on the data we already have
+Data Analysis.py : Doing data analysis based on the data we already have
 Data Quality and Availability Check；
 Team Strength Modeling；
 Fixture Difficulty Proxy；
