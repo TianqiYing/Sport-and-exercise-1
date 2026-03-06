@@ -10,6 +10,6 @@ Gambling odds: Bet365, Betway, Pinnacle, William Hill etc.
 
 Data Analysis: Doing data analysis based on the data we already have
 Data Quality and Availability Check；
-Team Strength Modeling 
-Fixture Difficulty Proxy
+Team Strength Modeling；
+Fixture Difficulty Proxy；
 Rolling Statistics Feasibility Experiment
