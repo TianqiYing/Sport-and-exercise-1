@@ -14,3 +14,6 @@ Data Quality and Availability Check；
 Team Strength Modeling；
 Fixture Difficulty Proxy；
 Rolling Statistics Feasibility Experiment
+
+Varience.py:
+Not only predict the expected score (mean), but also estimate the variance/distribution around the prediction for each player, used to characterize stability.
