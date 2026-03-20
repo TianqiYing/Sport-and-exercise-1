@@ -14,3 +14,8 @@ Data Quality and Availability Check；
 Team Strength Modeling；
 Fixture Difficulty Proxy；
 Rolling Statistics Feasibility Experiment
+
+Varience.py: Currently not completed(20/3/2026)
+If use it as an "FPL rules simulator + optimizer": it's essentially complete (auto-subs, formation, captain, and distribution simulation are all included).
+
+If use it as an "end-to-end system (data scraping → training → prediction → transfer + starting XI recommendations)": it still lacks the "integration of models and constraints", so it's not truly ready to run out of the box.
