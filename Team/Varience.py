@@ -1,522 +1,609 @@
-import argparse
-import hashlib
-import json
-import os
-import time
+from __future__ import annotations
+
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Tuple
-
+from typing import Dict, List, Optional, Tuple, Callable
+import random
+import math
 import numpy as np
-import pandas as pd
-import requests
 
 
-# -----------------------------
-# StatsBomb Open Data endpoints
-# -----------------------------
-BASE = "https://raw.githubusercontent.com/statsbomb/open-data/master/data"
-COMPETITIONS_URL = f"{BASE}/competitions.json"
+# Core data structures
+
+Position = str  # "GK", "DEF", "MID", "FWD"
+
+@dataclass(frozen=True)
+class Player:
+    player_id: int
+    name: str
+    position: Position
+    team: str
+    price: float  # for transfer/budget constraints (optional)
 
 
-def ensure_dir(p: str) -> None:
-    os.makedirs(p, exist_ok=True)
-
-
-def read_json_file(path: str):
-    with open(path, "r", encoding="utf-8") as f:
-        return json.load(f)
-
-
-def write_json_file(path: str, obj) -> None:
-    with open(path, "w", encoding="utf-8") as f:
-        json.dump(obj, f)
-
-
-def _safe_filename(s: str) -> str:
-    return hashlib.md5(s.encode("utf-8")).hexdigest()
-
-
-def _get_json(
-    session: requests.Session,
-    url: str,
-    cache_dir: str,
-    timeout: int = 180,
-    retries: int = 5,
-    backoff: float = 1.8,
-    sleep_after: float = 0.05,
-):
-    """
-    Robust JSON fetcher:
-      - local cache
-      - longer timeout
-      - retries with exponential backoff
-    """
-    ensure_dir(cache_dir)
-    cache_path = os.path.join(cache_dir, _safe_filename(url) + ".json")
-    if os.path.exists(cache_path):
-        return read_json_file(cache_path)
-
-    last_err = None
-    for i in range(retries):
-        try:
-            # stream=True avoids some large-response edge cases; we still read fully
-            r = session.get(url, timeout=timeout, stream=True)
-            r.raise_for_status()
-            text = r.content.decode("utf-8")
-            obj = json.loads(text)
-            write_json_file(cache_path, obj)
-            time.sleep(sleep_after)
-            return obj
-        except Exception as e:
-            last_err = e
-            wait = (backoff ** i)
-            print(f"[WARN] fetch failed ({i+1}/{retries}) url={url} err={type(e).__name__}: {e} -> retry in {wait:.1f}s")
-            time.sleep(wait)
-
-    raise RuntimeError(f"Failed to fetch after retries: {url}") from last_err
-
-
-def find_competition_season(
-    session: requests.Session, cache_dir: str, competition_name: str, season_name: str
-) -> Tuple[int, int]:
-    comps = _get_json(session, COMPETITIONS_URL, cache_dir=cache_dir)
-    matches = []
-    for c in comps:
-        if str(c.get("competition_name", "")).lower() == competition_name.lower() and \
-           str(c.get("season_name", "")).lower() == season_name.lower():
-            matches.append((int(c["competition_id"]), int(c["season_id"])))
-    if not matches:
-        raise ValueError(
-            f"Could not find competition='{competition_name}', season='{season_name}'. "
-            f"Try a different season_name, or pass --competition-id/--season-id."
-        )
-    return matches[0]
-
-
-def load_matches(session: requests.Session, cache_dir: str, competition_id: int, season_id: int) -> List[dict]:
-    url = f"{BASE}/matches/{competition_id}/{season_id}.json"
-    return _get_json(session, url, cache_dir=cache_dir)
-
-
-def load_events(session: requests.Session, cache_dir: str, match_id: int) -> List[dict]:
-    url = f"{BASE}/events/{match_id}.json"
-    return _get_json(session, url, cache_dir=cache_dir)
-
-
-# -----------------------------
-# FPL proxy scoring (no BPS)
-# -----------------------------
-def map_position_to_fpl(pos_name: str) -> str:
-    s = (pos_name or "").lower()
-    if "goalkeeper" in s:
-        return "GK"
-    if "back" in s or "wing back" in s or "centre back" in s or "full back" in s:
-        return "DEF"
-    if "midfield" in s or "winger" in s or "wide" in s:
-        return "MID"
-    if "forward" in s or "striker" in s:
-        return "FWD"
-    return "MID"
-
-
-def fpl_points_proxy(
-    position: str,
-    minutes: int,
-    goals: int,
-    assists: int,
-    goals_conceded: int,
-    yellow: int,
-    red: int,
-    own_goals: int,
-    pen_miss: int,
-    pen_save: int,
-    saves: int,
-    clean_sheet: bool,
-) -> int:
-    pts = 0
-    if minutes > 0:
-        pts += 1
-    if minutes >= 60:
-        pts += 1
-
-    if position in ("GK", "DEF"):
-        pts += 6 * goals
-    elif position == "MID":
-        pts += 5 * goals
-    else:
-        pts += 4 * goals
-
-    pts += 3 * assists
-
-    if clean_sheet and minutes >= 60:
-        if position in ("GK", "DEF"):
-            pts += 4
-        elif position == "MID":
-            pts += 1
-
-    if position in ("GK", "DEF") and minutes >= 60 and goals_conceded > 0:
-        pts -= (goals_conceded // 2)
-
-    if position == "GK":
-        pts += 5 * pen_save
-        pts += (saves // 3)
-
-    pts -= 1 * yellow
-    pts -= 3 * red
-    pts -= 2 * own_goals
-    pts -= 2 * pen_miss
-    return int(pts)
-
-
-# -----------------------------
-# Event extraction helpers
-# -----------------------------
-def build_minutes_from_subs(events: List[dict]) -> Dict[int, int]:
-    max_minute = 90
-    for e in events:
-        m = e.get("minute")
-        if isinstance(m, int):
-            max_minute = max(max_minute, m)
-
-    starters = set()
-    for e in events:
-        if e.get("type", {}).get("name") == "Starting XI":
-            lineup = e.get("tactics", {}).get("lineup", [])
-            for p in lineup:
-                pid = p.get("player", {}).get("id")
-                if pid is not None:
-                    starters.add(int(pid))
-
-    start_min = {pid: 0 for pid in starters}
-    end_min = {pid: max_minute for pid in starters}
-
-    for e in events:
-        if e.get("type", {}).get("name") == "Substitution":
-            minute = int(e.get("minute", 0))
-            off_id = e.get("player", {}).get("id")
-            on_id = e.get("substitution", {}).get("replacement", {}).get("id")
-            if off_id is not None:
-                off_id = int(off_id)
-                end_min[off_id] = min(end_min.get(off_id, max_minute), minute)
-                start_min.setdefault(off_id, 0)
-            if on_id is not None:
-                on_id = int(on_id)
-                start_min[on_id] = minute
-                end_min[on_id] = max_minute
-
-    minutes = {}
-    for pid, s in start_min.items():
-        e = end_min.get(pid, max_minute)
-        minutes[pid] = max(0, int(e) - int(s))
-    return minutes
-
-
-def parse_player_events(events: List[dict]) -> Dict[int, dict]:
-    pass_by_id = {}
-    for e in events:
-        if e.get("type", {}).get("name") == "Pass":
-            pass_by_id[e.get("id")] = e
-
-    stats: Dict[int, dict] = {}
-
-    def _ensure(pid: int):
-        if pid not in stats:
-            stats[pid] = dict(goals=0, assists=0, yellow=0, red=0, own_goals=0, pen_miss=0, pen_save=0, saves=0)
-
-    for e in events:
-        etype = e.get("type", {}).get("name")
-
-        if etype == "Shot":
-            shooter = e.get("player", {}).get("id")
-            if shooter is not None:
-                shooter = int(shooter)
-                _ensure(shooter)
-
-            shot = e.get("shot", {}) or {}
-            outcome = (shot.get("outcome", {}) or {}).get("name", "").lower()
-            stype = (shot.get("type", {}) or {}).get("name", "").lower()
-
-            if outcome == "goal":
-                if shooter is not None:
-                    stats[shooter]["goals"] += 1
-                key_pass_id = shot.get("key_pass_id")
-                if key_pass_id in pass_by_id:
-                    passer = pass_by_id[key_pass_id].get("player", {}).get("id")
-                    if passer is not None:
-                        passer = int(passer)
-                        _ensure(passer)
-                        stats[passer]["assists"] += 1
-
-            if "penalty" in stype and outcome != "goal" and shooter is not None:
-                stats[shooter]["pen_miss"] += 1
-
-        if etype in ("Foul Committed", "Bad Behaviour"):
-            pid = e.get("player", {}).get("id")
-            if pid is None:
-                continue
-            pid = int(pid)
-            _ensure(pid)
-            if etype == "Foul Committed":
-                card = (e.get("foul_committed", {}) or {}).get("card", {})
-            else:
-                card = (e.get("bad_behaviour", {}) or {}).get("card", {})
-            cname = (card.get("name") or "").lower() if card else ""
-            if "yellow" in cname:
-                stats[pid]["yellow"] += 1
-            if "red" in cname:
-                stats[pid]["red"] += 1
-
-        if etype == "Goal Keeper":
-            pid = e.get("player", {}).get("id")
-            if pid is None:
-                continue
-            pid = int(pid)
-            _ensure(pid)
-            gk = e.get("goalkeeper", {}) or {}
-            gk_type = (gk.get("type", {}) or {}).get("name", "").lower()
-            if "save" in gk_type:
-                stats[pid]["saves"] += 1
-            if "penalty" in gk_type and "save" in gk_type:
-                stats[pid]["pen_save"] += 1
-
-    return stats
-
-
-# -----------------------------
-# Rolling distribution
-# -----------------------------
-def rolling_distribution_features(s: pd.Series, window: int, prefix: str) -> pd.DataFrame:
-    s_shift = s.shift(1)
-    rp = s_shift.rolling(window, min_periods=1)
-    rf = s_shift.rolling(window, min_periods=window)
-    return pd.DataFrame({
-        f"{prefix}mean_roll{window}_partial": rp.mean(),
-        f"{prefix}std_roll{window}_partial": rp.std(ddof=0),
-        f"{prefix}q10_roll{window}_partial": rp.quantile(0.10),
-        f"{prefix}q50_roll{window}_partial": rp.quantile(0.50),
-        f"{prefix}q90_roll{window}_partial": rp.quantile(0.90),
-
-        f"{prefix}mean_roll{window}_full": rf.mean(),
-        f"{prefix}std_roll{window}_full": rf.std(ddof=0),
-        f"{prefix}q10_roll{window}_full": rf.quantile(0.10),
-        f"{prefix}q50_roll{window}_full": rf.quantile(0.50),
-        f"{prefix}q90_roll{window}_full": rf.quantile(0.90),
-    })
-
-
-def add_player_rolling(df: pd.DataFrame, windows: Tuple[int, ...]) -> pd.DataFrame:
-    df = df.copy()
-    df["match_date"] = pd.to_datetime(df["match_date"])
-    df = df.sort_values(["player_id", "match_date"])
-    parts = [df]
-    for w in windows:
-        parts.append(df.groupby("player_id", group_keys=False)["points"].apply(lambda s: rolling_distribution_features(s, w, "pts_")))
-        parts.append(df.groupby("player_id", group_keys=False)["minutes"].apply(lambda s: rolling_distribution_features(s, w, "min_")))
-    return pd.concat(parts, axis=1)
-
-
-def build_leaderboards(df_roll: pd.DataFrame, window: int) -> Tuple[pd.DataFrame, pd.DataFrame]:
-    latest = df_roll.sort_values(["player_id", "match_date"]).groupby("player_id").tail(1).copy()
-    latest["risk_spread"] = latest[f"pts_q90_roll{window}_full"] - latest[f"pts_q10_roll{window}_full"]
-    latest["pts_mean"] = latest[f"pts_mean_roll{window}_full"]
-    latest["pts_q10"] = latest[f"pts_q10_roll{window}_full"]
-    latest["pts_q90"] = latest[f"pts_q90_roll{window}_full"]
-
-    consistent = latest.dropna(subset=["pts_q10", "risk_spread"]).sort_values(
-        ["pts_q10", "risk_spread"], ascending=[False, True]
-    ).head(50)
-
-    high_risk = latest.dropna(subset=["pts_q90", "risk_spread"]).sort_values(
-        ["pts_q90", "risk_spread"], ascending=[False, False]
-    ).head(50)
-
-    cols = ["player_name", "position", "team", "pts_mean", "pts_q10", "pts_q90", "risk_spread", "minutes"]
-    return consistent[cols], high_risk[cols]
-
-
-# -----------------------------
-# Main
-# -----------------------------
 @dataclass
-class Config:
-    outdir: str
-    cache_dir: str
-    windows: Tuple[int, ...]
-    competition_name: str
-    season_name: str
-    competition_id: Optional[int]
-    season_id: Optional[int]
-    max_matches: Optional[int]  # for quick test
+class TeamState:
+    """
+    Represents a manager's 15-player squad and resources at a given gameweek deadline.
+    """
+    squad: List[Player]                # length 15
+    bank: float                        # remaining budget (optional)
+    free_transfers: int                # e.g., 1 or 2
+    hits_taken: int                    # total hits this season (optional)
+    chips_available: Dict[str, bool]   # e.g., {"WC": True, "FH": True, "TC": True}
 
 
-def main(cfg: Config) -> None:
-    ensure_dir(cfg.outdir)
-    ensure_dir(cfg.cache_dir)
+@dataclass
+class LineupDecision:
+    xi: List[int]               # 11 player_ids
+    bench: List[int]            # 4 player_ids, in order
+    captain: int
+    vice_captain: int
 
-    session = requests.Session()
-    session.headers.update({"User-Agent": "MDM3C-Variance/1.0"})
 
-    if cfg.competition_id is None or cfg.season_id is None:
-        comp_id, season_id = find_competition_season(session, cfg.cache_dir, cfg.competition_name, cfg.season_name)
-    else:
-        comp_id, season_id = cfg.competition_id, cfg.season_id
+@dataclass
+class GWOutcome:
+    """
+    One Monte Carlo sample outcome for a given GW and lineup decision.
+    """
+    gw_points: float
+    effective_xi: List[int]     # final XI after autosub
+    captain_effective: Optional[int]
+    debug: Dict[str, object]
 
-    matches = load_matches(session, cfg.cache_dir, comp_id, season_id)
-    if cfg.max_matches is not None:
-        matches = matches[: cfg.max_matches]
 
-    rows = []
-    for m in matches:
-        match_id = int(m["match_id"])
-        match_date = (m.get("match_date") or m.get("kick_off") or "")[:10]
-        match_week = m.get("match_week")
-        home_team = m["home_team"]["home_team_name"]
-        away_team = m["away_team"]["away_team_name"]
-        home_score = int(m.get("home_score", 0))
-        away_score = int(m.get("away_score", 0))
+# Sampler interface
 
-        events = load_events(session, cfg.cache_dir, match_id)
-        minutes_map = build_minutes_from_subs(events)
-        pstats = parse_player_events(events)
+class PlayerSampler:
 
-        # positions & names from starting XI
-        pos_map: Dict[int, str] = {}
-        name_map: Dict[int, str] = {}
-        team_map: Dict[int, str] = {}
-        homeflag: Dict[int, int] = {}
+    def sample_minutes_points(self, player_id: int, gw: int) -> Tuple[int, float]:
+        """
+        Return one sample of (minutes, points) for the player at gameweek gw.
+        points should already be FPL points for that GW.
+        """
+        raise NotImplementedError
 
-        for e in events:
-            if e.get("type", {}).get("name") == "Starting XI":
-                team_name = e.get("team", {}).get("name", "")
-                lineup = e.get("tactics", {}).get("lineup", [])
-                for p in lineup:
-                    pid = p.get("player", {}).get("id")
-                    if pid is None:
-                        continue
-                    pid = int(pid)
-                    name_map[pid] = p.get("player", {}).get("name", f"player_{pid}")
-                    team_map[pid] = team_name
-                    homeflag[pid] = 1 if team_name == home_team else 0
-                    pos_map[pid] = map_position_to_fpl((p.get("position") or {}).get("name", ""))
+    def sample_minutes(self, player_id: int, gw: int) -> int:
+        raise NotImplementedError
 
-        # include subs (fallback MID)
-        for e in events:
-            if e.get("type", {}).get("name") == "Substitution":
-                team_name = e.get("team", {}).get("name", "")
-                repl = (e.get("substitution", {}) or {}).get("replacement", {}) or {}
-                pid = repl.get("id")
-                if pid is None:
-                    continue
-                pid = int(pid)
-                name_map.setdefault(pid, repl.get("name", f"player_{pid}"))
-                team_map.setdefault(pid, team_name)
-                homeflag.setdefault(pid, 1 if team_name == home_team else 0)
-                pos_map.setdefault(pid, "MID")
+    def sample_points_given_minutes(self, player_id: int, gw: int, minutes: int) -> float:
+        raise NotImplementedError
 
-        # rows
-        for pid, mins in minutes_map.items():
-            team = team_map.get(pid)
-            if not team:
+
+# Formation rules
+
+def count_positions(player_ids: List[int], squad_map: Dict[int, Player]) -> Dict[Position, int]:
+    counts = {"GK": 0, "DEF": 0, "MID": 0, "FWD": 0}
+    for pid in player_ids:
+        pos = squad_map[pid].position
+        counts[pos] += 1
+    return counts
+
+
+def is_valid_xi(player_ids: List[int], squad_map: Dict[int, Player]) -> bool:
+    """
+    Standard FPL XI constraints:
+      - total 11
+      - exactly 1 GK
+      - DEF: 3-5
+      - MID: 2-5
+      - FWD: 1-3
+    """
+    if len(player_ids) != 11:
+        return False
+    c = count_positions(player_ids, squad_map)
+    if c["GK"] != 1:
+        return False
+    if not (3 <= c["DEF"] <= 5):
+        return False
+    if not (2 <= c["MID"] <= 5):
+        return False
+    if not (1 <= c["FWD"] <= 3):
+        return False
+    # ensure counts sum to 11
+    return sum(c.values()) == 11
+
+
+# Auto-substitution logic
+
+def apply_autosub(
+    decision: LineupDecision,
+    minutes: Dict[int, int],
+    squad_map: Dict[int, Player],
+) -> List[int]:
+    """
+    Apply standard-like autosub:
+      - Bench players normally score 0
+      - If any starter has minutes==0, attempt to replace using bench order
+      - Goalkeeper: bench GK replaces starter GK if starter GK minutes==0
+      - Outfield subs in order; replacement must keep a valid formation
+    Returns effective XI (11 player_ids).
+    """
+    xi = list(decision.xi)
+
+    # Identify bench GK vs outfield bench.
+    # Convention: bench[-1] is GK.
+    bench = list(decision.bench)
+    bench_outfield = bench[:3]
+    bench_gk = bench[3]
+
+    # GK substitution
+    # Find starter GK
+    starter_gk = next((pid for pid in xi if squad_map[pid].position == "GK"), None)
+    if starter_gk is None:
+        # invalid input, but don't crash
+        return xi
+
+    if minutes.get(starter_gk, 0) == 0 and minutes.get(bench_gk, 0) > 0:
+        # Replace GK
+        xi.remove(starter_gk)
+        xi.append(bench_gk)
+
+    # Outfield substitutions
+    # repeatedly try to replace non-playing outfield starters
+    for sub in bench_outfield:
+        if minutes.get(sub, 0) == 0:
+            continue
+
+        # find current non-playing outfield players in XI
+        non_playing = [pid for pid in xi if minutes.get(pid, 0) == 0 and squad_map[pid].position != "GK"]
+        if not non_playing:
+            break
+
+        # Try to replace one of them such that formation stays valid
+        replaced = False
+        for victim in non_playing:
+            trial = [p for p in xi if p != victim] + [sub]
+            if is_valid_xi(trial, squad_map):
+                xi = trial
+                replaced = True
+                break
+
+        # If sub can't be used without breaking formation, skip to next sub.
+        # This matches FPL behavior: a sub only comes on if a legal formation can be maintained.
+        if replaced:
+            continue
+
+    # Ensure 11 players
+    if len(xi) != 11:
+        # fallback: trim or pad not handled; keep as-is
+        pass
+    return xi
+
+
+# Captain / vice-captain rule
+
+def resolve_captain(
+    decision: LineupDecision,
+    effective_xi: List[int],
+    minutes: Dict[int, int],
+) -> Optional[int]:
+    """
+    Returns which player gets doubled points:
+      - captain if played (>0 minutes)
+      - else vice if played and is in effective XI
+      - else None
+    """
+    cap = decision.captain
+    vice = decision.vice_captain
+
+    if cap in effective_xi and minutes.get(cap, 0) > 0:
+        return cap
+    if vice in effective_xi and minutes.get(vice, 0) > 0:
+        return vice
+    return None
+
+
+# Score a single Monte Carlo sample
+
+def simulate_one_gw_sample(
+    gw: int,
+    decision: LineupDecision,
+    squad_map: Dict[int, Player],
+    sampler: PlayerSampler,
+) -> GWOutcome:
+    """
+    One simulation path for a GW:
+      - sample (minutes, points) for all 15 players (or at least XI+bench)
+      - apply autosub to get effective XI
+      - sum points for effective XI that played
+      - apply captain doubling
+    """
+    # sample minutes & points for all players involved (15)
+    all_ids = set(decision.xi + decision.bench)
+    minutes: Dict[int, int] = {}
+    points: Dict[int, float] = {}
+
+    for pid in all_ids:
+        m, p = sampler.sample_minutes_points(pid, gw)
+        minutes[pid] = int(m)
+        points[pid] = float(p)
+
+    effective_xi = apply_autosub(decision, minutes, squad_map)
+    base = sum(points[pid] for pid in effective_xi if minutes.get(pid, 0) > 0)
+
+    cap_effective = resolve_captain(decision, effective_xi, minutes)
+    if cap_effective is not None:
+        base += points[cap_effective]  # add one more time = doubling
+
+    dbg = {
+        "minutes": minutes,
+        "points": points,
+        "cap_effective": cap_effective,
+    }
+    return GWOutcome(gw_points=base, effective_xi=effective_xi, captain_effective=cap_effective, debug=dbg)
+
+
+def simulate_gw_distribution(
+    gw: int,
+    decision: LineupDecision,
+    squad: List[Player],
+    sampler: PlayerSampler,
+    n_sims: int = 10000,
+    seed: int = 0,
+) -> Dict[str, object]:
+    """
+    Monte Carlo distribution for GW team score.
+    Returns summary stats + raw samples.
+    """
+    rng = random.Random(seed)
+    random.seed(seed)
+    np.random.seed(seed)
+
+    squad_map = {p.player_id: p for p in squad}
+
+    samples = np.empty(n_sims, dtype=float)
+    for k in range(n_sims):
+        out = simulate_one_gw_sample(gw, decision, squad_map, sampler)
+        samples[k] = out.gw_points
+
+    samples.sort()
+    res = {
+        "mean": float(samples.mean()),
+        "std": float(samples.std(ddof=0)),
+        "q10": float(np.quantile(samples, 0.10)),
+        "q50": float(np.quantile(samples, 0.50)),
+        "q90": float(np.quantile(samples, 0.90)),
+        "samples": samples,
+    }
+    return res
+
+
+# Matchup win probability
+
+def win_probability(
+    gw: int,
+    decision_a: LineupDecision,
+    squad_a: List[Player],
+    decision_b: LineupDecision,
+    squad_b: List[Player],
+    sampler: PlayerSampler,
+    n_sims: int = 10000,
+    seed: int = 0,
+) -> Dict[str, float]:
+    """
+    Estimate P(scoreA > scoreB) and expected advantage in GW.
+    Assumes sampler can sample for both squads (player_id space is global).
+    """
+    dist_a = simulate_gw_distribution(gw, decision_a, squad_a, sampler, n_sims=n_sims, seed=seed)
+    dist_b = simulate_gw_distribution(gw, decision_b, squad_b, sampler, n_sims=n_sims, seed=seed + 1)
+
+    a = dist_a["samples"]
+    b = dist_b["samples"]
+    # Align lengths if needed
+    m = min(len(a), len(b))
+    a = a[:m]
+    b = b[:m]
+
+    p_win = float(np.mean(a > b))
+    exp_adv = float(np.mean(a - b))
+    return {"p_win": p_win, "exp_adv": exp_adv}
+
+
+# Simple lineup optimization skeleton
+
+def greedy_lineup_initial(
+    squad: List[Player],
+    predicted_mean: Dict[int, float],
+) -> LineupDecision:
+    """
+    Build a naive starting XI + bench order from predicted mean points.
+    """
+    squad_map = {p.player_id: p for p in squad}
+
+    # Sort by predicted mean, descending
+    ranked = sorted([p.player_id for p in squad], key=lambda pid: predicted_mean.get(pid, 0.0), reverse=True)
+
+    # Start with top 11 then adjust to valid formation
+    xi = ranked[:11]
+    # Repair formation: try swaps from bench until valid
+    bench_pool = ranked[11:]
+
+    # Ensure exactly 1 GK in XI
+    # If XI has 0 or 2 GK, swap accordingly.
+    def gk_ids(ids): return [pid for pid in ids if squad_map[pid].position == "GK"]
+    while True:
+        c = count_positions(xi, squad_map)
+        if c["GK"] == 1 and is_valid_xi(xi, squad_map):
+            break
+        # repair GK count first
+        if c["GK"] == 0:
+            # find best GK from bench_pool, swap with worst outfield in XI
+            gk_candidates = [pid for pid in bench_pool if squad_map[pid].position == "GK"]
+            if not gk_candidates:
+                break
+            best_gk = max(gk_candidates, key=lambda pid: predicted_mean.get(pid, 0.0))
+            # remove worst outfield
+            outfield = [pid for pid in xi if squad_map[pid].position != "GK"]
+            worst = min(outfield, key=lambda pid: predicted_mean.get(pid, 0.0))
+            xi.remove(worst)
+            xi.append(best_gk)
+            bench_pool.remove(best_gk)
+            bench_pool.append(worst)
+            continue
+        if c["GK"] > 1:
+            # move extra GK to bench, bring best outfield
+            gks = gk_ids(xi)
+            # keep best GK
+            keep = max(gks, key=lambda pid: predicted_mean.get(pid, 0.0))
+            drop = [pid for pid in gks if pid != keep][0]
+            xi.remove(drop)
+            # bring best outfield from bench_pool
+            out_candidates = [pid for pid in bench_pool if squad_map[pid].position != "GK"]
+            if not out_candidates:
+                break
+            best_out = max(out_candidates, key=lambda pid: predicted_mean.get(pid, 0.0))
+            xi.append(best_out)
+            bench_pool.remove(best_out)
+            bench_pool.append(drop)
+            continue
+
+        # If GK ok but formation invalid, try swapping lowest xi player with best bench player of needed position
+        # Simple approach: try a few random swaps
+        repaired = False
+        for _ in range(50):
+            victim = min(xi, key=lambda pid: predicted_mean.get(pid, 0.0))
+            cand = max(bench_pool, key=lambda pid: predicted_mean.get(pid, 0.0))
+            trial = [p for p in xi if p != victim] + [cand]
+            if is_valid_xi(trial, squad_map):
+                xi = trial
+                bench_pool.remove(cand)
+                bench_pool.append(victim)
+                repaired = True
+                break
+            else:
+                # try another candidate
+                bench_pool.remove(cand)
+                bench_pool.append(cand)
+        if not repaired:
+            break
+
+    # Bench: 3 outfield by mean, GK last
+    bench_sorted = sorted(bench_pool, key=lambda pid: predicted_mean.get(pid, 0.0), reverse=True)
+    bench_gk = [pid for pid in bench_sorted if squad_map[pid].position == "GK"]
+    bench_out = [pid for pid in bench_sorted if squad_map[pid].position != "GK"]
+
+    bench = bench_out[:3] + [bench_gk[0] if bench_gk else bench_out[3]]
+
+    # Captain: best predicted in XI; vice: second best in XI
+    xi_sorted = sorted(xi, key=lambda pid: predicted_mean.get(pid, 0.0), reverse=True)
+    cap = xi_sorted[0]
+    vice = xi_sorted[1] if len(xi_sorted) > 1 else xi_sorted[0]
+
+    return LineupDecision(xi=xi, bench=bench, captain=cap, vice_captain=vice)
+
+
+def local_search_lineup(
+    gw: int,
+    squad: List[Player],
+    sampler: PlayerSampler,
+    start: LineupDecision,
+    n_iter: int = 50,
+    n_sims: int = 3000,
+    mode: str = "mean",  # "mean" or "q10" or "pwin" (needs opponent)
+    opponent: Optional[Tuple[List[Player], LineupDecision]] = None,
+) -> LineupDecision:
+    squad_map = {p.player_id: p for p in squad}
+
+    def objective(dec: LineupDecision) -> float:
+        dist = simulate_gw_distribution(gw, dec, squad, sampler, n_sims=n_sims, seed=123)
+        if mode == "mean":
+            return dist["mean"]
+        if mode == "q10":
+            return dist["q10"]
+        if mode == "pwin":
+            assert opponent is not None
+            opp_squad, opp_dec = opponent
+            out = win_probability(gw, dec, squad, opp_dec, opp_squad, sampler, n_sims=n_sims, seed=123)
+            return out["p_win"]
+        raise ValueError("Unknown mode")
+
+    best = start
+    best_val = objective(best)
+
+    for _ in range(n_iter):
+        cand = LineupDecision(
+            xi=list(best.xi),
+            bench=list(best.bench),
+            captain=best.captain,
+            vice_captain=best.vice_captain,
+        )
+
+        # propose a random move
+        move_type = random.choice(["swap_xi_bench", "swap_captain"])
+        if move_type == "swap_xi_bench":
+            # pick random xi player (not GK) and random bench outfield
+            xi_out = [pid for pid in cand.xi if squad_map[pid].position != "GK"]
+            bench_out = cand.bench[:3]
+            if xi_out and bench_out:
+                x = random.choice(xi_out)
+                b = random.choice(bench_out)
+                trial_xi = [p for p in cand.xi if p != x] + [b]
+                if is_valid_xi(trial_xi, squad_map):
+                    cand.xi = trial_xi
+                    # bench swap
+                    cand.bench = [x if pid == b else pid for pid in cand.bench]
+        else:
+            # change captain among top 5 predicted by mean using quick samples
+            xi_sorted = list(cand.xi)
+            random.shuffle(xi_sorted)
+            cand.captain = xi_sorted[0]
+            cand.vice_captain = xi_sorted[1] if len(xi_sorted) > 1 else xi_sorted[0]
+
+        val = objective(cand)
+        if val > best_val:
+            best, best_val = cand, val
+
+    return best
+
+
+# Transfer optimization skeleton (rolling horizon)
+
+@dataclass
+class TransferAction:
+    out_ids: List[int]
+    in_players: List[Player]
+    hit_cost: int  # points penalty (e.g., 4 per extra transfer)
+    description: str = ""
+
+
+def generate_transfer_candidates(
+    state: TeamState,
+    player_universe: List[Player],
+    predicted_mean_nextk: Dict[Tuple[int, int], float],
+    gw: int,
+    max_in: int = 20,
+) -> List[TransferAction]:
+    """
+    Generate a small list of plausible transfers (MVP heuristic):
+    - consider transferring out lowest projected players
+    - consider transferring in top projected players within budget/constraints
+    This is only a skeleton; add price/team-limit/position constraints as needed.
+    """
+    squad_ids = {p.player_id for p in state.squad}
+    # rank current squad by predicted mean (next GW only for simplicity)
+    out_rank = sorted(state.squad, key=lambda p: predicted_mean_nextk.get((p.player_id, gw), 0.0))
+    candidates_in = sorted(
+        [p for p in player_universe if p.player_id not in squad_ids],
+        key=lambda p: predicted_mean_nextk.get((p.player_id, gw), 0.0),
+        reverse=True,
+    )[:max_in]
+
+    actions: List[TransferAction] = []
+    # simplest: 0 transfer
+    actions.append(TransferAction(out_ids=[], in_players=[], hit_cost=0, description="No transfer"))
+
+    # 1-transfer candidates (transfer out 1 of bottom 5, in 1 of top N same position)
+    for out_p in out_rank[:5]:
+        for in_p in candidates_in:
+            if in_p.position != out_p.position:
                 continue
-            is_home = homeflag.get(pid, 1 if team == home_team else 0)
-            opp = away_team if is_home == 1 else home_team
-            ga = away_score if team == home_team else home_score
-            clean = 1 if (ga == 0 and mins >= 60) else 0
+            # TODO: budget/team limits
+            actions.append(TransferAction(out_ids=[out_p.player_id], in_players=[in_p], hit_cost=0, description=f"{out_p.name}->{in_p.name}"))
 
-            st = pstats.get(pid, {})
-            goals = int(st.get("goals", 0))
-            assists = int(st.get("assists", 0))
-            yellow = int(st.get("yellow", 0))
-            red = int(st.get("red", 0))
-            own_goals = int(st.get("own_goals", 0))
-            pen_miss = int(st.get("pen_miss", 0))
-            pen_save = int(st.get("pen_save", 0))
-            saves = int(st.get("saves", 0))
-
-            pos = pos_map.get(pid, "MID")
-            pts = fpl_points_proxy(
-                position=pos,
-                minutes=int(mins),
-                goals=goals,
-                assists=assists,
-                goals_conceded=int(ga),
-                yellow=yellow,
-                red=red,
-                own_goals=own_goals,
-                pen_miss=pen_miss,
-                pen_save=pen_save,
-                saves=saves,
-                clean_sheet=bool(clean),
-            )
-
-            rows.append({
-                "competition": cfg.competition_name,
-                "season": cfg.season_name,
-                "match_id": match_id,
-                "match_date": match_date,
-                "match_week": int(match_week) if match_week is not None else None,
-                "team": team,
-                "opponent": opp,
-                "is_home": is_home,
-                "player_id": int(pid),
-                "player_name": name_map.get(pid, f"player_{pid}"),
-                "position": pos,
-                "minutes": int(mins),
-                "goals": goals,
-                "assists": assists,
-                "goals_conceded": int(ga),
-                "clean_sheet": int(clean),
-                "yellow": yellow,
-                "red": red,
-                "own_goals": own_goals,
-                "pen_miss": pen_miss,
-                "pen_save": pen_save,
-                "saves": saves,
-                "points": int(pts),
-            })
-
-        print(f"[OK] match_id={match_id} date={match_date} players={len(minutes_map)}")
-
-    df = pd.DataFrame(rows)
-    base_path = os.path.join(cfg.outdir, "player_match_points.csv")
-    df.to_csv(base_path, index=False)
-
-    df_roll = add_player_rolling(df, cfg.windows)
-    roll_path = os.path.join(cfg.outdir, "player_match_with_rolling.csv")
-    df_roll.to_csv(roll_path, index=False)
-
-    w0 = cfg.windows[0]
-    cons, risk = build_leaderboards(df_roll, w0)
-    cons.to_csv(os.path.join(cfg.outdir, f"leaderboard_consistent_roll{w0}.csv"), index=False)
-    risk.to_csv(os.path.join(cfg.outdir, f"leaderboard_highrisk_roll{w0}.csv"), index=False)
-
-    print("Done.")
-    print("Saved:", base_path)
-    print("Saved:", roll_path)
-    print("Tip: First run with --max-matches 5 to warm cache; then remove it.")
+    # 2-transfer candidates can be added similarly (and hit cost if > free_transfers)
+    return actions
 
 
-if __name__ == "__main__":
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--outdir", default="outputs_player_variance", help="Output directory")
-    ap.add_argument("--cache-dir", default="cache_statsbomb", help="Cache directory for downloaded JSON")
-    ap.add_argument("--windows", default="5,8", help="Rolling windows, e.g. 5,8,10")
-    ap.add_argument("--competition-name", default="Premier League", help="Competition name in competitions.json")
-    ap.add_argument("--season-name", default="2015/2016", help="Season name in competitions.json")
-    ap.add_argument("--competition-id", type=int, default=None)
-    ap.add_argument("--season-id", type=int, default=None)
-    ap.add_argument("--max-matches", type=int, default=5, help="Limit matches for quick test (warm cache)")
-    args = ap.parse_args()
-
-    windows = tuple(int(x.strip()) for x in args.windows.split(",") if x.strip())
-    cfg = Config(
-        outdir=args.outdir,
-        cache_dir=args.cache_dir,
-        windows=windows,
-        competition_name=args.competition_name,
-        season_name=args.season_name,
-        competition_id=args.competition_id,
-        season_id=args.season_id,
-        max_matches=args.max_matches,
+def apply_transfer_action(state: TeamState, action: TransferAction) -> TeamState:
+    new_squad = [p for p in state.squad if p.player_id not in set(action.out_ids)]
+    new_squad.extend(action.in_players)
+    # TODO: update bank/free_transfers/hits
+    return TeamState(
+        squad=new_squad,
+        bank=state.bank,  # update later
+        free_transfers=state.free_transfers,
+        hits_taken=state.hits_taken,
+        chips_available=dict(state.chips_available),
     )
-    main(cfg)
+
+
+def evaluate_plan_lookahead(
+    state: TeamState,
+    gw: int,
+    horizon: int,
+    sampler: PlayerSampler,
+    objective_mode: str = "mean",  # "mean", "q10", "pwin"
+    opponent_plan: Optional[Callable[[int], Tuple[List[Player], LineupDecision]]] = None,
+    n_sims: int = 4000,
+) -> float:
+    """
+    Evaluate a given state over K weeks by simulating best lineup each week (simplified).
+    MVP: choose lineup by greedy mean each week; compute objective over horizon.
+    """
+    total_samples = []
+
+    # MVP: treat weeks independent
+    total_mean = 0.0
+    total_q10 = 0.0
+    pwin_vals = []
+
+    for t in range(gw, gw + horizon):
+        raise NotImplementedError("Connect your predicted_mean and lineup optimizer here")
+
+    # return objective
+    if objective_mode == "mean":
+        return total_mean
+    if objective_mode == "q10":
+        return total_q10
+    if objective_mode == "pwin":
+        return float(np.mean(pwin_vals)) if pwin_vals else 0.0
+    return total_mean
+
+
+def optimize_transfers_and_lineup(
+    state: TeamState,
+    gw: int,
+    player_universe: List[Player],
+    sampler: PlayerSampler,
+    predicted_mean_nextk: Dict[Tuple[int, int], float],
+    horizon: int = 3,
+    mode: str = "mean",
+    opponent: Optional[Tuple[List[Player], LineupDecision]] = None,
+) -> Tuple[TransferAction, LineupDecision]:
+    """
+    High-level skeleton:
+      - generate transfer candidates
+      - for each, apply, then choose best lineup (with local search)
+      - evaluate lookahead objective
+      - return best transfer + GW lineup decision
+    """
+    transfer_candidates = generate_transfer_candidates(
+        state, player_universe, predicted_mean_nextk, gw, max_in=20
+    )
+
+    best_action = transfer_candidates[0]
+    best_decision = None
+    best_val = -1e18
+
+    for action in transfer_candidates:
+        st2 = apply_transfer_action(state, action)
+
+        # Build a starting lineup using predicted_mean for current GW
+        predicted_mean_gw = {p.player_id: predicted_mean_nextk.get((p.player_id, gw), 0.0) for p in st2.squad}
+        start_dec = greedy_lineup_initial(st2.squad, predicted_mean_gw)
+
+        # Refine lineup with local search using distribution simulator
+        opp_tuple = opponent if mode == "pwin" else None
+        dec = local_search_lineup(
+            gw, st2.squad, sampler, start_dec,
+            n_iter=30, n_sims=2500, mode=("pwin" if mode == "pwin" else ("q10" if mode=="q10" else "mean")),
+            opponent=opp_tuple
+        )
+
+        # Evaluate objective for this GW only (MVP).
+        if mode == "pwin" and opponent is not None:
+            val = win_probability(gw, dec, st2.squad, opponent[1], opponent[0], sampler, n_sims=2500)["p_win"]
+        else:
+            dist = simulate_gw_distribution(gw, dec, st2.squad, sampler, n_sims=2500)
+            val = dist["mean"] if mode == "mean" else dist["q10"]
+
+        # subtract hit cost (points penalty)
+        val -= action.hit_cost
+
+        if val > best_val:
+            best_val = val
+            best_action = action
+            best_decision = dec
+
+    assert best_decision is not None
+    return best_action, best_decision
