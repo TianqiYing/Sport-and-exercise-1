@@ -20,3 +20,5 @@ RMSE for player-level point prediction (each row is one (player, gameweek) sampl
 A simple baseline using the average scores from the last five games
 Opponent strength: Utilize the official FPL FDR (team difficulty rating) directly. 
 Home/Away: 0/1 code, can interact with opponent strength as a feature.
+Run a ridge regression: the model learns about coefficient itself.
+Oracle
