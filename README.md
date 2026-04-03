@@ -15,7 +15,8 @@ Team Strength Modeling；
 Fixture Difficulty Proxy；
 Rolling Statistics Feasibility Experiment
 
-Varience.py: Currently not completed(20/3/2026)
-If use it as an "FPL rules simulator + optimizer": it's essentially complete (auto-subs, formation, captain, and distribution simulation are all included).
-
-If use it as an "end-to-end system (data scraping → training → prediction → transfer + starting XI recommendations)": it still lacks the "integration of models and constraints", so it's not truly ready to run out of the box.
+baseline.py:
+RMSE for player-level point prediction (each row is one (player, gameweek) sample)
+A simple baseline using the average scores from the last five games
+Opponent strength: Utilize the official FPL FDR (team difficulty rating) directly. 
+Home/Away: 0/1 code, can interact with opponent strength as a feature.
