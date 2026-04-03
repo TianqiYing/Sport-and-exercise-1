@@ -509,7 +509,7 @@ def main():
     feat["pred_official"] = predict_official(feat)
     feat["pred_official"] = feat["pred_official"].fillna(0.0)
 
-    # Ridge prediction for the single target GW (needed only if --predictor ridge)
+    # Ridge prediction for the single target GW
     feat["pred_ridge"] = 0.0
     if args.predictor == "ridge":
         ds_for_ridge = build_training_set(
@@ -560,7 +560,7 @@ def main():
         ds["pred_baseline"] = clean_pred_series(predict_baseline(ds).astype(float))
         ds["pred_official"] = clean_pred_series(predict_official(ds).astype(float))
 
-        # Ridge prediction: insample or walkforward
+        # Ridge prediction
         alphas = np.logspace(-3, 3, 25)
         ds["pred_ridge"] = np.nan
         if args.eval_scheme == "insample":
@@ -590,27 +590,43 @@ def main():
                 ])
                 ridge.fit(Xtr, ytr)
                 ds.loc[test.index, "pred_ridge"] = ridge.predict(Xte)
-            ds["pred_ridge"] = clean_pred_series(ds["pred_ridge"])  # fills early NaNs with 0
+            # keep NaNs for blank (warmup) GWs; only drop infinities
+            ds["pred_ridge"] = pd.Series(ds["pred_ridge"]).replace([np.inf, -np.inf], np.nan)
+            ridge_mask = ds["pred_ridge"].notna()
+
+        # Oracle: treat true points as "prediction" (upper bound for XI optimisation)
+        ds["pred_oracle"] = ds["y_points"].astype(float)
 
         # Unified evaluation helper
         y_true_all = ds["y_points"].to_numpy(dtype=float)
 
-        def eval_predictor(pred_col: str, k: int = 20):
-            yhat_all = np.nan_to_num(ds[pred_col].to_numpy(dtype=float), nan=0.0, posinf=0.0, neginf=0.0)
-            print(f"\nEvaluation: {pred_col}")
+        def eval_predictor(pred_col: str, k: int = 20, mask=None, title=None):
+            ds_eval = ds if mask is None else ds.loc[mask].copy()
+
+            if title is None:
+                title = pred_col
+            print(f"\nEvaluation: {title}")
+            print(f"Rows used: {len(ds_eval)} / {len(ds)}")
+
+            y_true_all = ds_eval["y_points"].to_numpy(dtype=float)
+            yhat_all = ds_eval[pred_col].to_numpy(dtype=float)
+            yhat_all = np.nan_to_num(yhat_all, nan=0.0, posinf=0.0, neginf=0.0)
             print("Overall RMSE:", rmse(y_true_all, yhat_all))
 
             sp_list, topk_list, xi_scores = [], [], []
-            for gw, g in ds.groupby("gw"):
+            for gw, g in ds_eval.groupby("gw"):
                 yt = g["y_points"].to_numpy(dtype=float)
-                yp = g[pred_col].to_numpy(dtype=float)
+                yp = np.nan_to_num(g[pred_col].to_numpy(dtype=float), nan=0.0, posinf=0.0, neginf=0.0)
 
-                rho = spearman(yt, yp)
-                if not math.isnan(rho):
-                    sp_list.append(rho)
+                # Avoid Spearman runtime warnings if constant arrays
+                if len(np.unique(yt)) > 1 and len(np.unique(yp)) > 1:
+                    rho = spearman(yt, yp)
+                    if not math.isnan(rho):
+                        sp_list.append(rho)
+
                 topk_list.append(topk_recall(yt, yp, k=k))
 
-                g = g.reset_index(drop=True)
+                g = g.reset_index(drop=True)  # ILP index safety
                 chosen = select_best_starting_xi(g, pred_col, budget=args.budget, with_captain=False)["xi"]
                 xi_scores.append(float(chosen["y_points"].sum()))
 
@@ -618,9 +634,16 @@ def main():
             print(f"Mean Recall@{k} (per-GW):", float(np.mean(topk_list)) if topk_list else float("nan"))
             print("Avg true XI points (chosen by pred):", float(np.mean(xi_scores)) if xi_scores else float("nan"))
 
-        eval_predictor("pred_baseline", k=20)
-        eval_predictor("pred_official", k=20)
-        eval_predictor("pred_ridge", k=20)
+        # full-sample evaluation
+        eval_predictor("pred_baseline", k=20, title="pred_baseline (all rows)")
+        eval_predictor("pred_official", k=20, title="pred_official (all rows)")
+        eval_predictor("pred_oracle", k=20, title="pred_oracle (all rows)")
+
+        # fair comparison on ridge-available rows only
+        eval_predictor("pred_baseline", k=20, mask=ridge_mask, title="pred_baseline (ridge rows only)")
+        eval_predictor("pred_official", k=20, mask=ridge_mask, title="pred_official (ridge rows only)")
+        eval_predictor("pred_ridge", k=20, mask=ridge_mask, title="pred_ridge (OOS only)")
+        eval_predictor("pred_oracle", k=20, mask=ridge_mask, title="pred_oracle (ridge rows only)")
 
 
 if __name__ == "__main__":
