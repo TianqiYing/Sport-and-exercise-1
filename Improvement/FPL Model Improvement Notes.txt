@@ -1,0 +1,79 @@
+FPL Model Improvement Notes
+1. Opponent Difficulty Adjustment: Differentiate Attack and Defence by Position
+Original problem: All players used the same fixture_factor = opponent_goals_conceded / league_average. This led to illogical outcomes, e.g., goalkeepers playing against Manchester City got a boost because City’s defence was considered "weak" (conceded many goals).
+
+Fix:
+
+python
+# Opponent defensive strength (for FWD/MID)
+team_def = train_df.groupby("team_x")["goals_conceded"].mean()
+avg_def  = team_def.mean()
+agg_df["def_factor"] = agg_df["opp_team_name"].map(team_def) / avg_def
+
+# Opponent attacking strength (for GK/DEF)
+team_atk = train_df.groupby("team_x")["goals_scored"].mean()
+avg_atk  = team_atk.mean()
+agg_df["atk_factor"] = avg_atk / agg_df["opp_team_name"].map(team_atk)
+
+# Use different factors based on position
+def get_factor(row):
+    if row["position"] in ["GK", "DEF"]:
+        return row["atk_factor"]   # stronger opponent attack → smaller factor → penalty
+    # weaker opponent defence → larger factor → bonus
+    ...
+2. Greedy → Linear Programming (PuLP)
+Greedy problem: Selects players one by one based on value-for-money, never revisits choices, may miss the global optimum.
+
+LP approach: Assign a 0/1 switch to each player, let the solver find the combination that maximises total points while satisfying all constraints.
+
+python
+from pulp import LpMaximize, LpProblem, LpVariable, lpSum
+
+agg_df = agg_df.reset_index(drop=True)
+n = len(agg_df)
+
+prob = LpProblem("FPL", LpMaximize)
+x = [LpVariable(f"x_{i}", cat="Binary") for i in range(n)]
+
+# Objective: maximise total expected points
+prob += lpSum(agg_df.loc[i, "expected_points"] * x[i] for i in range(n))
+
+# Constraint 1: budget
+# Constraint 2: exactly 11 players
+# Constraint 3: fixed squad size per position
+# Constraint 4: max 3 players from the same team
+
+prob.solve()
+
+selected_indices = [i for i in range(n) if x[i].varValue == 1]
+team_df = agg_df.loc[selected_indices]
+3. Volatility: Issues with Multiplication/Division
+Using multiplication/division to adjust expected points:
+
+text
+Safe: adjusted = xPts ÷ (1 + std)
+Risky: adjusted = xPts × (1 + std)
+Problem: The result is no longer in "points" units – it becomes a dimensionless ratio, unintuitive.
+Switching to addition/subtraction is cleaner:
+
+text
+Safe: adjusted = xPts – λ × std
+Risky: adjusted = xPts + λ × std
+But addition/subtraction has a fundamental issue:
+How to choose λ? λ = 0.3 vs λ = 0.7 can produce completely different squads – no objective basis, purely subjective.
+
+4. Monte Carlo: No Need to Guess λ
+Idea: Don’t guess parameters, just simulate. Each iteration adds random noise to each player’s expected points, run LP once, repeat 1000 times, count how often each player is selected.
+
+python
+selection_count = np.zeros(len(agg_df))
+
+for _ in range(1000):
+    simulated_points = (
+        agg_df["expected_points"] +
+        np.random.normal(0, agg_df["std_points"])
+    )
+Selection rate	Interpretation
+> 80%	Staple, must-have
+40% – 80%	Valuable but risky
+No subjective parameters needed – directly tells you which players are robust across various scenarios.
