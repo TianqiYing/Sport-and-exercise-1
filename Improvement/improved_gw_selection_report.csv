@@ -1,0 +1,839 @@
+name,position,team,latest_value,expected_points,std_points,selection_freq
+Cole Palmer,MID,Chelsea,57,11.955673527023876,3.8262252939417984,0.604
+Rodrigo Muniz Carvalho,FWD,Fulham,45,10.166864786617657,4.534313619501853,0.545
+Antonee Robinson,DEF,Fulham,45,7.421837910325269,3.521363372331802,0.388
+Benjamin White,DEF,Arsenal,56,7.280760776541646,3.867815921162743,0.385
+Timothy Castagne,DEF,Fulham,45,7.001094568289764,3.762977544445356,0.342
+AndrÃ© Onana,GK,Man Utd,48,6.73658268668388,3.3823069050575527,0.317
+Son Heung-min,MID,Spurs,100,7.883572009472974,5.607138307550474,0.292
+Ollie Watkins,FWD,Aston Villa,90,6.435684425141597,4.955804677345546,0.275
+Kai Havertz,MID,Arsenal,71,7.93207232153312,4.33589667773576,0.261
+Alexis Mac Allister,MID,Liverpool,58,8.781223467718283,2.8284271247461903,0.246
+Rayan AÃ¯t-Nouri,DEF,Wolves,45,5.207727308431141,4.979959839195493,0.238
+Bruno GuimarÃ£es Rodriguez Moura,MID,Newcastle,58,7.297523526608405,4.774934554525329,0.233
+Cristian Romero,DEF,Spurs,51,5.6271496559537155,3.8262252939417984,0.231
+John Stones,DEF,Man City,53,5.7066933583132355,3.4409301068170506,0.22
+Declan Rice,MID,Arsenal,54,7.0572939008661,4.673328578219168,0.216
+Lewis Dunk,DEF,Brighton,52,4.5282223657973795,4.995998398718719,0.206
+Nicolas Jackson,FWD,Chelsea,68,7.346094709165536,2.7856776554368237,0.195
+Phil Foden,MID,Man City,82,6.2711020644757545,5.388877434122992,0.191
+Conor Gallagher,MID,Chelsea,54,6.258171351368328,5.192301994298868,0.189
+Calvin Bassey,DEF,Fulham,44,5.7172394755140274,3.22490309931942,0.187
+Alexander Isak,FWD,Newcastle,75,6.4978742554125795,3.249615361854384,0.177
+Bernd Leno,GK,Fulham,48,5.680254170467796,2.9664793948382653,0.169
+Dango Ouattara,MID,Bournemouth,47,6.704065344445854,4.317406628984581,0.169
+Jarrod Bowen,MID,West Ham,80,4.163639279749916,6.997142273814361,0.164
+Antoine Semenyo,FWD,Bournemouth,45,5.437782215026245,4.127953488110059,0.161
+Chris Richards,DEF,Crystal Palace,39,3.8137549746428054,5.019960159204453,0.157
+Fabian SchÃ¤r,DEF,Newcastle,54,4.17235266375684,4.409081537009721,0.157
+Bukayo Saka,MID,Arsenal,92,5.967670107512898,4.955804677345547,0.154
+Jayden Bogle,DEF,Sheffield Utd,45,4.013517692641006,4.214261501141095,0.145
+Chris Wood,FWD,Nott'm Forest,48,5.833290489322032,3.4871191548325386,0.138
+Alphonse Areola,GK,West Ham,43,3.6899835139767925,4.223742416388575,0.114
+Axel Disasi,DEF,Chelsea,49,3.728793149247421,3.655133376499413,0.111
+Martin Ãdegaard,MID,Arsenal,85,4.9755604829099465,4.8,0.11
+Norberto Murara Neto,GK,Bournemouth,47,5.373114978789595,2.4166091947189146,0.109
+Bruno Borges Fernandes,MID,Man Utd,82,6.914228094430002,3.3105890714493698,0.102
+Bart Verbruggen,GK,Brighton,44,3.9387754693313215,3.7735924528226414,0.102
+Dominic Solanke,FWD,Bournemouth,72,3.466855745671008,4.489988864128729,0.087
+William Saliba,DEF,Arsenal,58,3.298494143199451,3.6660605559646724,0.087
+Gabriel dos Santos MagalhÃ£es,DEF,Arsenal,53,3.073506838402973,3.8781438859330635,0.084
+David Datro Fofana,FWD,Burnley,50,5.1954426343813855,3.2,0.082
+Alex Iwobi,MID,Fulham,53,6.083512178715236,3.8262252939417984,0.08
+Mads Roerslev Rasmussen,DEF,Brentford,44,2.9017002426446252,3.6,0.079
+Emerson Palmieri dos Santos,DEF,West Ham,44,2.295186001753698,4.2708313008125245,0.078
+Douglas Luiz Soares de Paulo,MID,Aston Villa,57,3.9105603442840646,5.192301994298868,0.077
+Virgil van Dijk,DEF,Liverpool,64,4.447275288100158,2.5298221281347035,0.074
+Rasmus HÃ¸jlund,FWD,Man Utd,70,2.2673237334352554,5.1536394906900505,0.073
+Lewis Cook,MID,Bournemouth,50,4.775416455915368,4.1182520563948,0.073
+Jakub Kiwior,DEF,Arsenal,43,4.504263712301603,2.8284271247461903,0.072
+Harry Wilson,MID,Fulham,53,3.571346061214735,5.1536394906900505,0.067
+Manuel Akanji,DEF,Man City,49,3.0879885610019424,3.6,0.066
+Caoimhin Kelleher,GK,Liverpool,38,4.768260321905677,2.5298221281347035,0.064
+Kristoffer Ajer,DEF,Brentford,44,4.301124873395015,2.638181191654584,0.063
+Cody Gakpo,FWD,Liverpool,72,3.1868621636705368,3.867815921162743,0.061
+Jack Robinson,DEF,Sheffield Utd,43,3.4592857737367693,3.1368774282716245,0.06
+Simon Adingra,MID,Brighton,50,2.783323589669881,5.491812087098393,0.058
+Jacob Bruun Larsen,MID,Burnley,48,4.475586268072559,4.049691346263317,0.057
+Tosin Adarabioyo,DEF,Fulham,43,4.339028652016631,2.6381811916545836,0.053
+Diogo Dalot Teixeira,DEF,Man Utd,52,4.040935534456675,2.576819745345025,0.052
+Jordan Ayew,MID,Crystal Palace,54,3.827726403189247,4.029888335921977,0.049
+Michail Antonio,FWD,West Ham,57,3.9597288930592303,3.3226495451672298,0.049
+Brennan Johnson,MID,Spurs,58,5.181260881892406,3.286335345030997,0.047
+Conor Bradley,DEF,Liverpool,41,3.9832515782557114,2.7129319932501073,0.045
+Harvey Elliott,MID,Liverpool,48,4.319097678951637,3.9698866482558417,0.045
+JoÃ£o Victor Gomes da Silva,MID,Wolves,49,2.6102335355319988,4.995998398718719,0.044
+Rodrigo Hernandez,MID,Man City,56,4.293022014219514,3.8262252939417984,0.044
+Pascal GroÃ,MID,Brighton,66,5.375007880923807,3.059411708155671,0.037
+Timo Werner,FWD,Spurs,63,3.8801615157452405,3.0724582991474434,0.037
+Matz Sels,GK,Nott'm Forest,45,3.4167237700227626,2.6832815729997477,0.035
+Jarrad Branthwaite,DEF,Everton,42,2.458519973077034,3.1240998703626617,0.035
+Ibrahima KonatÃ©,DEF,Liverpool,49,2.325059205624599,3.098386676965933,0.034
+Illia Zabarnyi,DEF,Bournemouth,45,3.4139286668743862,2.7856776554368237,0.034
+Ederson Santana de Moraes,GK,Man City,55,2.608430742731845,3.1368774282716245,0.034
+Vini de Souza Costa,MID,Sheffield Utd,50,2.9146206731069126,4.516635916254486,0.034
+Leon Bailey,MID,Aston Villa,57,3.9384598203111514,3.8781438859330635,0.033
+Anthony Gordon,MID,Newcastle,61,5.218077405551196,3.1240998703626617,0.032
+Alejandro Garnacho,MID,Man Utd,50,5.674368268120795,2.756809750418044,0.031
+Morgan Gibbs-White,MID,Nott'm Forest,57,5.747019679971955,2.6381811916545836,0.029
+Dan Burn,DEF,Newcastle,44,3.0930208378934054,2.756809750418044,0.029
+Victor LindelÃ¶f,DEF,Man Utd,45,3.6202163691245253,2.5298221281347035,0.029
+Marcus Rashford,MID,Man Utd,84,5.7986460248695,2.7129319932501073,0.026
+Callum Hudson-Odoi,MID,Nott'm Forest,47,2.980681124261697,3.8262252939417984,0.026
+Leandro Trossard,MID,Arsenal,65,2.935267580979868,4.127953488110059,0.025
+Darwin NÃºÃ±ez Ribeiro,FWD,Liverpool,75,4.892195992351487,2.1354156504062622,0.023
+Harry Maguire,DEF,Man Utd,42,1.4677681995074787,3.2,0.022
+Mohamed Salah,MID,Liverpool,130,2.2536133334148185,4.317406628984581,0.022
+Erling Haaland,FWD,Man City,144,4.081530950443746,2.33238075793812,0.022
+Pedro Porro,DEF,Spurs,58,3.047193007762909,2.6076809620810595,0.022
+Jean-Philippe Mateta,FWD,Crystal Palace,49,4.558571902538441,2.3323807579381204,0.021
+Daniel MuÃ±oz,DEF,Crystal Palace,45,3.5186635670602713,2.4819347291981715,0.021
+Malo Gusto,DEF,Chelsea,42,3.4593039000553985,2.3151673805580453,0.02
+Reece Burke,DEF,Luton,40,2.819681149094077,2.6381811916545836,0.02
+Gabriel Martinelli Silva,MID,Arsenal,77,3.3528563811125878,3.7202150475476548,0.02
+James Maddison,MID,Spurs,80,4.778392696802819,2.9257477676655586,0.019
+VladimÃ­r Coufal,DEF,West Ham,46,3.408410298705534,2.4,0.019
+Dejan Kulusevski,MID,Spurs,68,4.529832416389829,2.85657137141714,0.018
+Carlton Morris,FWD,Luton,52,2.963935705941086,2.939387691339814,0.018
+Enes Ãnal,FWD,Bournemouth,50,3.617992320018511,2.5298221281347035,0.017
+SaÅ¡a LukiÄ,MID,Fulham,43,5.21927154470413,2.6832815729997477,0.017
+Thiago Emiliano da Silva,DEF,Chelsea,50,1.466360142895436,3.0983866769659336,0.014
+Mykhailo Mudryk,MID,Chelsea,63,4.758528036150006,2.727636339397171,0.012
+Jan Paul van Hecke,DEF,Brighton,41,2.8468777022818177,2.449489742783178,0.012
+Guglielmo Vicario,GK,Spurs,53,4.01908452124234,1.5491933384829666,0.011
+Emiliano MartÃ­nez Romero,GK,Aston Villa,53,3.5204499257363375,1.7888543819998317,0.011
+Martin Dubravka,GK,Newcastle,42,2.777937106359763,2.4166091947189146,0.011
+Destiny Udogie,DEF,Spurs,50,3.243808720286722,2.039607805437114,0.01
+Joe Gomez,DEF,Liverpool,46,2.8646917227679802,2.0976176963403033,0.009
+David Raya Martin,GK,Arsenal,50,2.1581063468902513,2.5298221281347035,0.009
+Kurt Zouma,DEF,West Ham,45,1.8708306754212807,2.870540018881465,0.009
+Jonny Evans,DEF,Man Utd,40,3.2694750725194326,2.0976176963403033,0.008
+Lucas Digne,DEF,Aston Villa,46,1.8869324382528911,2.5298221281347035,0.008
+RaphaÃ«l Varane,DEF,Man Utd,49,3.1552367391868006,2.039607805437114,0.008
+Cauley Woodrow,FWD,Luton,43,1.6745789490310772,2.9257477676655586,0.007
+Sam Johnstone,GK,Crystal Palace,44,2.598431179606477,2.0591260281974,0.007
+Danny Ings,FWD,West Ham,56,1.5642222793665208,2.727636339397171,0.007
+Kyle Walker,DEF,Man City,54,2.3337479182140193,2.4819347291981715,0.007
+Sven Botman,DEF,Newcastle,45,1.831549189680967,2.6381811916545836,0.007
+Pervis EstupiÃ±Ã¡n,DEF,Brighton,49,2.233577779696277,2.244994432064365,0.007
+Gustavo Hamer,MID,Sheffield Utd,49,4.453624823897102,2.3323807579381204,0.007
+Pablo Sarabia,MID,Wolves,47,3.122875798441341,3.1240998703626617,0.006
+JosÃ© Malheiro de SÃ¡,GK,Wolves,50,2.2898516140423193,2.280350850198276,0.006
+Chris Mepham,DEF,Bournemouth,43,2.151976183589725,2.5298221281347035,0.006
+Joel Ward,DEF,Crystal Palace,45,2.383445578178428,2.039607805437114,0.005
+Enzo FernÃ¡ndez,MID,Chelsea,48,5.089958637925572,2.4,0.005
+Eberechi Eze,MID,Crystal Palace,60,2.083286953836513,3.1240998703626617,0.004
+Pape Matar Sarr,MID,Spurs,44,3.6882322413155775,2.5768197453450252,0.004
+Jacob Murphy,MID,Newcastle,48,4.860727051630362,2.1354156504062622,0.004
+Tino Livramento,DEF,Newcastle,41,2.243622951244506,2.5298221281347035,0.004
+Felipe Augusto de Almeida Monteiro,DEF,Nott'm Forest,44,0.9021276292143231,2.6076809620810595,0.003
+Amadou Onana,MID,Everton,47,2.0232973218710657,2.870540018881465,0.003
+Edson Ãlvarez VelÃ¡zquez,MID,West Ham,50,2.0306796689958557,3.1240998703626617,0.003
+Ryan Christie,MID,Bournemouth,50,4.583991038227406,2.4000000000000004,0.003
+Craig Dawson,DEF,Wolves,45,1.3771436605601464,2.4819347291981715,0.003
+Moussa NiakhatÃ©,DEF,Nott'm Forest,45,0.7640555408843407,2.4,0.003
+RÃºben Gato Alves Dias,DEF,Man City,55,1.890324774564571,2.4,0.002
+Taiwo Awoniyi,FWD,Nott'm Forest,63,1.7384909352468243,2.5768197453450252,0.002
+Murillo Santiago Costa dos Santos,DEF,Nott'm Forest,45,2.5091003463424184,2.227105745132009,0.002
+Nathan AkÃ©,DEF,Man City,51,2.3447156183205964,1.9595917942265422,0.002
+Kaoru Mitoma,MID,Brighton,64,0.9161558954437429,3.487119154832539,0.002
+Luis DÃ­az,MID,Liverpool,75,4.2577747565424495,2.5612496949731396,0.001
+Tahith Chong,MID,Luton,47,3.617691810338033,2.481934729198171,0.001
+Luke Berry,MID,Luton,46,2.5092638079299308,2.244994432064365,0.001
+Raheem Sterling,MID,Chelsea,69,2.764937917133984,2.7276363393971716,0.001
+Cameron Archer,FWD,Sheffield Utd,42,0.8992001228616577,2.8000000000000003,0.001
+Danny Welbeck,FWD,Brighton,57,1.4254249690500629,2.3151673805580453,0.001
+Justin Kluivert,MID,Bournemouth,46,3.493503283240248,2.3323807579381204,0.001
+Joe Willock,MID,Newcastle,53,3.176223676204477,2.227105745132009,0.001
+Toti AntÃ³nio Gomes,DEF,Wolves,44,2.2669870537629704,1.8547236990991407,0.001
+Milos Kerkez,DEF,Bournemouth,44,2.1128090798242565,2.33238075793812,0.001
+Victor da Silva,DEF,Burnley,44,2.8098287443228016,1.6,0.001
+Jordan Pickford,GK,Everton,46,2.4124540743489917,1.469693845669907,0.001
+Joachim Andersen,DEF,Crystal Palace,47,2.4976937244086863,1.8547236990991407,0.001
+Nuno Varela Tavares,DEF,Nott'm Forest,40,0.665757344105727,2.4,0.001
+NÃ©lson Cabral Semedo,DEF,Wolves,45,2.339467671286162,1.624807680927192,0.001
+Yoane Wissa,FWD,Brentford,56,3.3465381666321443,1.9390719429665317,0.001
+Ben Doak,MID,Liverpool,43,6.796352677589264e-12,0.0,0.0
+Ben Godfrey,DEF,Everton,43,1.1421406167113552,0.4898979485566356,0.0
+Ben Greenwood,DEF,Bournemouth,40,0.0,0.0,0.0
+Ben Jackson,DEF,Brighton,40,0.0,0.0,0.0
+Ben Johnson,DEF,West Ham,44,0.6273005181026896,0.4,0.0
+Ben Mee,DEF,Brentford,48,0.25228383207429916,0.4,0.0
+Ben Osborn,MID,Sheffield Utd,48,2.3497995994871013,1.3564659966250536,0.0
+Ben Parkinson,FWD,Newcastle,45,2.0655449525420095e-07,0.0,0.0
+Ben Pearson,MID,Bournemouth,45,0.0,0.0,0.0
+BendegÃºz Bolla,DEF,Wolves,40,0.0,0.0,0.0
+Benicio Baker-Boaitey,MID,Brighton,45,0.06627919548330258,0.4,0.0
+Benjamin Arthur,DEF,Brentford,40,0.0,0.0,0.0
+Benjamin Fredrick,DEF,Brentford,40,0.0,0.0,0.0
+BenoÃ®t Badiashile,DEF,Chelsea,44,0.22291194962469135,0.4,0.0
+Bernardo Veiga de Carvalho e Silva,MID,Man City,62,1.9385510177533853,1.16619037896906,0.0
+Bertrand TraorÃ©,MID,Aston Villa,50,1.0842870852120768e-08,0.0,0.0
+Billy Blacker,FWD,Sheffield Utd,45,0.0,0.0,0.0
+Billy Gilmour,MID,Brighton,49,0.19188166178805757,1.2,0.0
+Bobby Clark,MID,Liverpool,44,0.47461029094683577,0.48989794855663565,0.0
+Bobby De Cordova-Reid,MID,Fulham,53,1.4069132194292333,1.16619037896906,0.0
+Bobby Thomas,DEF,Burnley,40,0.0,0.0,0.0
+Boubacar Kamara,MID,Aston Villa,50,0.014347691919874677,0.0,0.0
+Boubacar TraorÃ©,MID,Wolves,43,0.27994669069510286,0.4898979485566356,0.0
+Bradley Ibrahim,MID,Arsenal,45,0.0,0.0,0.0
+Braian Ojeda RodrÃ­guez,MID,Nott'm Forest,45,0.0,0.0,0.0
+Brandon Aguilera Zamora,MID,Nott'm Forest,45,0.0002905765772338927,0.0,0.0
+Brandon Austin,GK,Spurs,39,0.0,0.0,0.0
+Brandon Williams,DEF,Man Utd,40,0.0,0.0,0.0
+Bruno Cavaco JordÃ£o,MID,Wolves,43,0.0,0.0,0.0
+Bryan Gil Salvatierra,MID,Spurs,49,0.005408830430354209,0.0,0.0
+Bryan Mbeumo,MID,Brentford,67,0.5288139958842091,0.4,0.0
+BÃ©nie TraorÃ©,FWD,Sheffield Utd,51,3.7578527902359293e-06,0.0,0.0
+CJ Egan-Riley,DEF,Burnley,39,0.0,0.0,0.0
+Callum Marshall,FWD,West Ham,45,0.0,0.0,0.0
+Callum Scanlon,DEF,Liverpool,39,0.0,0.0,0.0
+Callum Wilson,FWD,Newcastle,78,0.2244080517001705,0.4,0.0
+Calum Chambers,DEF,Aston Villa,38,0.12157243469245621,0.4,0.0
+Cameron Peupion,MID,Brighton,45,0.0,0.0,0.0
+Carlos Baleba,MID,Brighton,45,1.2081126951168348,1.0954451150103321,0.0
+Carlos Henrique Casimiro,MID,Man Utd,53,1.9566373162052837,1.019803902718557,0.0
+Carlos Mendes Gomes,MID,Luton,45,0.0,0.0,0.0
+Carlos VinÃ­cius Alves Morais,FWD,Fulham,45,7.400664767823062e-05,0.0,0.0
+Carney Chukwuemeka,MID,Chelsea,42,0.678098270355651,0.48989794855663565,0.0
+Cesare Casadei,MID,Chelsea,45,0.7248221932283786,0.48989794855663565,0.0
+Charles Sagoe,MID,Arsenal,45,0.0,0.0,0.0
+Charlie Goode,DEF,Brentford,39,0.0,0.0,0.0
+Charlie Taylor,DEF,Burnley,40,1.0210049316267036,0.4,0.0
+Cheick DoucourÃ©,MID,Crystal Palace,49,4.145685447103221e-07,0.0,0.0
+Cheikhou KouyatÃ©,MID,Nott'm Forest,48,0.27594814751746405,0.4,0.0
+Chiedozie Ogbene,FWD,Luton,49,2.530727565126458,1.2,0.0
+Chris Basham,DEF,Sheffield Utd,39,7.063181199136115e-09,0.0,0.0
+Christian Eriksen,MID,Man Utd,58,0.13440930876301682,0.4,0.0
+Christian NÃ¸rgaard,MID,Brentford,53,0.9828269352693609,0.7999999999999999,0.0
+Christian Pulisic,MID,Chelsea,55,0.0,0.0,0.0
+Christopher Nkunku,FWD,Chelsea,72,0.546055811121381,0.7483314773547882,0.0
+ClÃ©ment Lenglet,DEF,Aston Villa,45,1.0265446714854076,0.6324555320336759,0.0
+Connor Roberts,DEF,Burnley,43,0.0003540507052232986,0.0,0.0
+Conor Coventry,MID,West Ham,43,0.0,0.0,0.0
+Curtis Jones,MID,Liverpool,49,0.4100963679140174,0.8,0.0
+CÃ©dric Alves Soares,DEF,Arsenal,38,0.3071969280009373,0.4898979485566356,0.0
+CÃ©sar Azpilicueta,DEF,Chelsea,45,0.0,0.0,0.0
+Daiki Hashioka,DEF,Luton,40,0.3712401693088946,0.48989794855663565,0.0
+Dan Potts,DEF,Luton,39,0.0,0.0,0.0
+Dane Scarlett,FWD,Spurs,45,0.16120233728463398,0.4,0.0
+Daniel Bentley,GK,Wolves,39,0.27632395656346687,0.4,0.0
+Daniel Castelo Podence,MID,Wolves,53,0.0,0.0,0.0
+Daniel Gore,MID,Man Utd,45,9.148367185901724e-05,0.0,0.0
+Daniel Jebbison,FWD,Sheffield Utd,48,0.0,0.0,0.0
+Danilo dos Santos de Oliveira,MID,Nott'm Forest,53,1.2457123651148434,1.2,0.0
+Dara Costelloe,MID,Burnley,45,0.0,0.0,0.0
+Dara O'Shea,DEF,Burnley,44,1.3542778299641618,0.7483314773547882,0.0
+Darko Churlinov,MID,Burnley,44,0.0,0.0,0.0
+Darren Randolph,GK,Bournemouth,40,0.0,0.0,0.0
+David Brooks,MID,Bournemouth,47,0.001385939807773632,0.0,0.0
+David Ozoh,MID,Crystal Palace,45,0.19184965495382442,0.4898979485566356,0.0
+Davinson SÃ¡nchez,DEF,Spurs,44,0.0,0.0,0.0
+Dean Henderson,GK,Crystal Palace,44,0.10256980631233897,0.4,0.0
+Deivid Washington de Souza EugÃªnio,FWD,Chelsea,45,7.689021290840526e-08,0.0,0.0
+Dele Alli,MID,Everton,48,0.0,0.0,0.0
+Demarai Gray,MID,Everton,53,0.0,0.0,0.0
+Denis Franchi,GK,Burnley,39,0.0,0.0,0.0
+Deniz Undav,FWD,Brighton,55,0.0,0.0,0.0
+Dermot Mee,GK,Man Utd,40,0.0,0.0,0.0
+Detlef Esapa Osong,FWD,Nott'm Forest,45,0.0,0.0,0.0
+Devan Tanton,DEF,Fulham,40,0.0,0.0,0.0
+Diego Carlos Santos Silva,DEF,Aston Villa,44,0.016330263093729345,0.0,0.0
+Diego Manuel Jadon da Silva Moreira,MID,Chelsea,45,0.0,0.0,0.0
+Diogo Teixeira da Silva,MID,Liverpool,80,1.420572792390628,2.85657137141714,0.0
+Dion Pereira,MID,Luton,44,0.0,0.0,0.0
+Divin Mubama,FWD,West Ham,41,0.0002989101895144272,0.0,0.0
+Divock Origi,FWD,Nott'm Forest,50,2.5966072777627134,0.9797958971132712,0.0
+Djed Spence,DEF,Spurs,40,0.0,0.0,0.0
+Dominic Calvert-Lewin,FWD,Everton,58,1.461254504975182,0.48989794855663565,0.0
+Dominic Dos Santos Martins,MID,Luton,45,0.0,0.0,0.0
+Dominic Sadi,MID,Bournemouth,45,0.0,0.0,0.0
+Dominik Szoboszlai,MID,Liverpool,71,1.4716387653488163,0.7999999999999999,0.0
+Donny van de Beek,MID,Man Utd,47,1.5348413231937923e-09,0.0,0.0
+Dovydas Sasnauskas,DEF,Sheffield Utd,40,0.0,0.0,0.0
+Dwight McNeil,MID,Everton,54,2.9470330900937793,2.4,0.0
+Eddie Beach,GK,Chelsea,40,0.0,0.0,0.0
+Eddie Nketiah,FWD,Arsenal,51,0.3605390540949931,0.4898979485566356,0.0
+Elijah Adebayo,FWD,Luton,49,0.11310425953750988,0.0,0.0
+Elijah Campbell,DEF,Everton,40,0.0,0.0,0.0
+Ellery Balcombe,GK,Brentford,39,0.0,0.0,0.0
+Elliot Anderson,MID,Newcastle,42,0.8870340917563965,0.4898979485566356,0.0
+Elliot Thorpe,MID,Luton,45,0.0,0.0,0.0
+Ellis Simms,FWD,Everton,45,0.0,0.0,0.0
+Emerson Leite de Souza Junior,DEF,Spurs,43,0.508934700486763,0.8,0.0
+Emil Krafth,DEF,Newcastle,44,0.5158657064676435,0.48989794855663565,0.0
+Emile Smith Rowe,MID,Arsenal,53,0.19152313673680454,0.4898979485566356,0.0
+Emiliano BuendÃ­a Stati,MID,Aston Villa,57,0.0,0.0,0.0
+Emiliano Marcondes,MID,Bournemouth,43,0.0,0.0,0.0
+Emmanuel Dennis,FWD,Nott'm Forest,48,0.0,0.0,0.0
+Enock Agyei,MID,Burnley,42,0.0,0.0,0.0
+Enso GonzÃ¡lez,MID,Wolves,50,0.0,0.0,0.0
+Eric Bailly,DEF,Man Utd,40,0.0,0.0,0.0
+Eric Dier,DEF,Spurs,42,0.00036736786006567656,0.0,0.0
+Ethan Ampadu,DEF,Chelsea,40,0.0,0.0,0.0
+Ethan Brierley,MID,Brentford,45,0.0,0.0,0.0
+Ethan Horvath,GK,Nott'm Forest,43,0.0,0.0,0.0
+Ethan Nwaneri,MID,Arsenal,45,0.06952675472262146,0.4,0.0
+Ethan Pinnock,DEF,Brentford,45,0.11219672044356843,0.0,0.0
+Evan Ferguson,FWD,Brighton,58,1.1077688234097118,0.4898979485566356,0.0
+Ezri Konsa Ngoyo,DEF,Aston Villa,45,1.5690859006646847,0.7483314773547882,0.0
+Fabian Mrozek,GK,Liverpool,40,0.0,0.0,0.0
+Fabio Henrique Tavares,MID,Liverpool,50,0.0,0.0,0.0
+Facundo Buonanotte,MID,Brighton,47,1.090115475415797,2.4979991993593593,0.0
+Facundo Pellistri Rebollo,MID,Man Utd,42,5.770368457527989e-05,0.0,0.0
+Femi Seriki,DEF,Sheffield Utd,39,0.0,0.0,0.0
+Filip Marschall,GK,Aston Villa,40,0.0,0.0,0.0
+Flynn Downes,MID,West Ham,50,0.0,0.0,0.0
+FodÃ© Ballo-TourÃ©,DEF,Fulham,45,0.004174079491884386,0.0,0.0
+Folarin Balogun,FWD,Arsenal,44,0.0,0.0,0.0
+Francisco Jorge TomÃ¡s Oliveira,MID,Wolves,45,0.0,0.0,0.0
+Franco Umeh-Chibueze,FWD,Crystal Palace,45,0.0,0.0,0.0
+Frank Onyeka,MID,Brentford,49,1.4023438197417066,1.3564659966250536,0.0
+Fraser Forster,GK,Spurs,38,0.0,0.0,0.0
+Fred Onyedinma,MID,Luton,50,0.0,0.0,0.0
+Frederico Rodrigues de Paula Santos,MID,Man Utd,50,0.0,0.0,0.0
+FÃ¡bio Ferreira Vieira,MID,Arsenal,54,0.17456305733194383,0.4,0.0
+FÃ¡bio Silva,FWD,Wolves,52,3.864497454279405e-09,0.0,0.0
+Gabriel Fernando de Jesus,FWD,Arsenal,78,0.8316988879809826,0.4898979485566356,0.0
+Gabriel Osho,DEF,Luton,44,0.22489040474024968,0.8,0.0
+Gabriel SÅonina,GK,Chelsea,40,0.0,0.0,0.0
+Garang Kuol,MID,Newcastle,45,0.0,0.0,0.0
+Gavin Kilkenny,MID,Bournemouth,43,0.0,0.0,0.0
+George Baldock,DEF,Sheffield Utd,38,0.7394023578341495,0.4898979485566356,0.0
+George Earthy,MID,West Ham,45,0.0,0.0,0.0
+George Shelvey,GK,Nott'm Forest,39,0.0,0.0,0.0
+Gianluca Scamacca,FWD,West Ham,60,0.0,0.0,0.0
+Giovani Lo Celso,MID,Spurs,48,1.0006097825252276,0.4898979485566356,0.0
+Giovanni Reyna,MID,Nott'm Forest,47,0.13331990803630642,0.4,0.0
+Giulian Biancone,DEF,Nott'm Forest,39,0.0,0.0,0.0
+Glen Rea,MID,Luton,44,0.0,0.0,0.0
+Gonzalo Montiel,DEF,Nott'm Forest,44,0.10614477191073486,0.0,0.0
+GonÃ§alo Manuel Ganchinho Guedes,MID,Wolves,54,0.0,0.0,0.0
+Granit Xhaka,MID,Arsenal,60,0.0,0.0,0.0
+Gustavo Henrique Furtado Scarpa,MID,Nott'm Forest,45,0.0,0.0,0.0
+Habeeb Ogunneye,DEF,Man Utd,40,0.0,0.0,0.0
+Hakim Ziyech,MID,Chelsea,54,0.0,0.0,0.0
+Halil DerviÅoÄlu,FWD,Brentford,45,0.0,0.0,0.0
+Hamed TraorÃ¨,MID,Bournemouth,47,1.92510511491744e-09,0.0,0.0
+Han-Noah Massengo,MID,Burnley,49,0.004524936096964526,0.0,0.0
+Hannes Delcroix,DEF,Burnley,40,0.003870111000711485,0.0,0.0
+Hannibal Mejbri,MID,Man Utd,43,0.00010649884615501214,0.0,0.0
+Harrison Ashby,DEF,Newcastle,40,0.0,0.0,0.0
+Harrison Reed,MID,Fulham,45,1.0615391858402927,1.3564659966250536,0.0
+Harry Arter,MID,Nott'm Forest,43,0.0,0.0,0.0
+Harry Kane,FWD,Spurs,125,0.0,0.0,0.0
+Harry Toffolo,DEF,Nott'm Forest,44,1.7557699540016973,0.7483314773547882,0.0
+Harvey Barnes,MID,Newcastle,62,0.907091714255612,0.6324555320336759,0.0
+Harvey Griffiths,MID,Wolves,45,0.0,0.0,0.0
+Hjalmar Ekdal,DEF,Burnley,39,0.0004841594092835848,0.0,0.0
+Hugo Bueno LÃ³pez,DEF,Wolves,44,0.17947558292284937,0.4,0.0
+Hugo Lloris,GK,Spurs,47,0.0,0.0,0.0
+Hwang Hee-chan,MID,Wolves,55,0.7318294944057202,1.2649110640673518,0.0
+Hwang Ui-jo,FWD,Nott'm Forest,44,0.0,0.0,0.0
+HÃ¡kon Valdimarsson,GK,Brentford,40,0.0,0.0,0.0
+Ian Maatsen,MID,Chelsea,51,0.00047943888510585964,0.0,0.0
+Ibrahim SangarÃ©,MID,Nott'm Forest,49,1.083878576333907,0.8,0.0
+Idrissa Gueye,MID,Everton,48,0.6490764855810048,1.0954451150103321,0.0
+Igor Julio dos Santos de Paulo,DEF,Brighton,43,0.5067823202071885,0.4898979485566356,0.0
+Iliman Ndiaye,FWD,Sheffield Utd,55,0.0,0.0,0.0
+IonuÈ Radu,GK,Bournemouth,43,3.999224952141895e-08,0.0,0.0
+Isaac Hayden,MID,Newcastle,44,0.0,0.0,0.0
+IshÃ© Samuels-Smith,DEF,Chelsea,40,0.0,0.0,0.0
+Ismaila Coulibaly,MID,Sheffield Utd,44,0.0,0.0,0.0
+Issa Diop,DEF,Fulham,44,0.22803210664874943,0.4898979485566356,0.0
+Issa KaborÃ©,DEF,Luton,40,1.180401226700937,0.9797958971132713,0.0
+Ivan Neves Abreu Cavaleiro,MID,Fulham,50,0.0,0.0,0.0
+Ivan PeriÅ¡iÄ,DEF,Spurs,47,1.1862370805645256e-09,0.0,0.0
+Ivan Toney,FWD,Brentford,82,2.0455756701904706,1.7435595774162695,0.0
+Ivo Grbic,GK,Sheffield Utd,45,1.777688498248945,1.2649110640673518,0.0
+Jack Cork,MID,Burnley,48,0.08126143876380243,0.4,0.0
+Jack Grealish,MID,Man City,72,0.20414419072472403,0.0,0.0
+Jack Harrison,MID,Everton,55,2.0457314030095386,0.4,0.0
+Jack Hinshelwood,MID,Brighton,45,0.2237760076423299,0.0,0.0
+Jack Walton,GK,Luton,40,0.0,0.0,0.0
+Jacob Brown,FWD,Luton,49,0.0005456246946910035,0.0,0.0
+Jacob Ramsey,MID,Aston Villa,59,0.919831389604163,1.8547236990991407,0.0
+Jacob Wright,MID,Man City,45,0.0,0.0,0.0
+Jadan Raymond,MID,Crystal Palace,45,0.0,0.0,0.0
+Jaden Philogene-Bidace,MID,Aston Villa,45,2.8377441765994086e-12,0.0,0.0
+Jadon Sancho,MID,Man Utd,67,6.129542308306726e-11,0.0,0.0
+Jaidon Anthony,MID,Bournemouth,49,1.7639729687349228e-10,0.0,0.0
+Jairo Riedewald,MID,Crystal Palace,43,2.4643657033817606e-05,0.0,0.0
+Jake O'Brien,DEF,Crystal Palace,40,0.0,0.0,0.0
+Jakub Moder,MID,Brighton,44,0.8920877881167211,0.7483314773547882,0.0
+Jamaal Lascelles,DEF,Newcastle,39,0.23408671448285545,0.4,0.0
+Jamal Lewis,DEF,Newcastle,40,0.0,0.0,0.0
+Jamal Lowe,MID,Bournemouth,49,0.0,0.0,0.0
+James Garner,MID,Everton,49,2.7126521346968966,1.3564659966250536,0.0
+James Hill,DEF,Bournemouth,40,0.10422302716844944,0.4,0.0
+James McAtee,MID,Sheffield Utd,44,2.0816207813692604,2.2449944320643644,0.0
+James McConnell,MID,Liverpool,44,0.23769914736458492,0.4898979485566356,0.0
+James Milner,MID,Brighton,48,0.003353944392864323,0.0,0.0
+James Shea,GK,Luton,43,0.0,0.0,0.0
+James Sweet,DEF,Arsenal,40,0.0,0.0,0.0
+James Tarkowski,DEF,Everton,46,1.1232340573623227,0.4,0.0
+James Tomkins,DEF,Crystal Palace,40,0.15356160000770067,0.4,0.0
+James Trafford,GK,Burnley,45,0.6974366561026876,0.7483314773547882,0.0
+James Ward-Prowse,MID,West Ham,59,1.9482485726664,1.469693845669907,0.0
+James Wright,GK,Aston Villa,40,0.0,0.0,0.0
+Jamie Donley,FWD,Spurs,45,8.20792325671606e-06,0.0,0.0
+Jamie McDonnell,MID,Nott'm Forest,45,0.0,0.0,0.0
+Japhet Tanganga,DEF,Spurs,40,0.0,0.0,0.0
+Jarell Quansah,DEF,Liverpool,40,1.3877633767466326,0.8944271909999159,0.0
+Jason Steele,GK,Brighton,42,0.5039030944549516,0.8,0.0
+Javier Manquillo GaitÃ¡n,DEF,Newcastle,40,0.0,0.0,0.0
+Jay Rodriguez,FWD,Burnley,53,0.3595739996952093,0.4898979485566356,0.0
+Jay Stansfield,FWD,Fulham,45,0.0,0.0,0.0
+Jayden Danns,FWD,Liverpool,44,0.16674780473612552,0.43301270189221935,0.0
+Jayden Luker,MID,Luton,45,0.0,0.0,0.0
+Jean-Philippe Gbamin,MID,Everton,44,0.0,0.0,0.0
+Jean-Ricner Bellegarde,MID,Wolves,49,1.1249164082585255,0.4898979485566356,0.0
+Jeff Hendrick,MID,Newcastle,44,0.0,0.0,0.0
+Jefferson Lerma SolÃ­s,MID,Crystal Palace,47,2.1597124732513056,1.8330302779823362,0.0
+Jeffrey Schlupp,MID,Crystal Palace,48,0.1053470339518555,0.0,0.0
+Jenson Metcalfe,MID,Everton,45,0.0,0.0,0.0
+Jeremy Sarmiento Morante,MID,Brighton,45,0.0,0.0,0.0
+Jesurun Rak-Sakyi,MID,Crystal Palace,45,3.7474485175611345e-08,0.0,0.0
+Jhon DurÃ¡n,FWD,Aston Villa,50,0.48206088480043635,0.4,0.0
+Ji-Soo Kim,DEF,Brentford,40,0.0,0.0,0.0
+Jili Buyabu,DEF,Sheffield Utd,40,0.0,0.0,0.0
+Jimi Tauriainen,MID,Chelsea,45,0.0,0.0,0.0
+Joe Gardner,FWD,Nott'm Forest,45,0.0,0.0,0.0
+Joe Gauci,GK,Aston Villa,39,0.0,0.0,0.0
+Joe Hodge,MID,Wolves,44,0.0,0.0,0.0
+Joe Hugill,FWD,Man Utd,45,0.0,0.0,0.0
+Joe Rodon,DEF,Spurs,40,0.0,0.0,0.0
+Joe Rothwell,MID,Bournemouth,48,5.9689515072579034e-05,0.0,0.0
+Joe Taylor,FWD,Luton,45,0.0,0.0,0.0
+Joe White,MID,Newcastle,45,0.13770109702312958,0.4,0.0
+Joe Whitworth,GK,Crystal Palace,39,0.0,0.0,0.0
+Joe Worrall,DEF,Nott'm Forest,43,4.635443313514691e-05,0.0,0.0
+Joel Matip,DEF,Liverpool,48,2.3906535812736013e-06,0.0,0.0
+Joelinton CÃ¡ssio ApolinÃ¡rio de Lira,MID,Newcastle,58,0.100523230377363,0.0,0.0
+John Egan,DEF,Sheffield Utd,43,-1.9694416826901967e-09,0.0,0.0
+John Fleck,MID,Sheffield Utd,49,3.1311773536734332e-06,0.0,0.0
+John McAtee,FWD,Luton,45,0.0,0.0,0.0
+John McGinn,MID,Aston Villa,54,1.2527761189077053,2.4166091947189146,0.0
+John-Kymani Gordon,FWD,Crystal Palace,45,0.0,0.0,0.0
+Jonathan Castro Otto,DEF,Wolves,43,1.2460876092211996e-09,0.0,0.0
+Jonathan Panzo,DEF,Nott'm Forest,40,0.0,0.0,0.0
+Jonjo Shelvey,MID,Nott'm Forest,48,0.0,0.0,0.0
+Vitalii Mykolenko,DEF,Everton,46,1.4504564762134267,0.4898979485566356,0.0
+Jordan Amissah,GK,Sheffield Utd,39,0.0,0.0,0.0
+Aleksandar MitroviÄ,FWD,Fulham,74,2.894985898076142e-12,0.0,0.0
+Jordan Beyer,DEF,Burnley,39,0.10022685186091686,0.0,0.0
+Jordan Clark,MID,Luton,48,2.0022283366434013,0.9797958971132712,0.0
+Jordan Henderson,MID,Liverpool,50,0.0,0.0,0.0
+Wout Weghorst,FWD,Burnley,55,0.0,0.0,0.0
+Jorge Luiz Frello Filho,MID,Arsenal,53,1.512970201268275,1.019803902718557,0.0
+Joseph Anang,GK,West Ham,40,0.0,0.0,0.0
+Joseph Johnson,DEF,Luton,40,0.0,0.0,0.0
+Josh Acheampong,DEF,Chelsea,40,0.0,0.0,0.0
+Josh Bowler,MID,Nott'm Forest,45,0.0,0.0,0.0
+Josh Brooking,DEF,Chelsea,40,0.0,0.0,0.0
+Josh Brownhill,MID,Burnley,47,0.6161890668033047,1.3564659966250536,0.0
+Josh Cullen,MID,Burnley,50,2.04791304555371,2.039607805437114,0.0
+Josh Dasilva,MID,Brentford,47,0.00032189807814848046,0.0,0.0
+Josh Powell,DEF,Nott'm Forest,39,0.0,0.0,0.0
+Joshua Duffus,MID,Brighton,44,0.0,0.0,0.0
+Joshua King,MID,Fulham,45,0.0,0.0,0.0
+Wilson Odobert,MID,Burnley,50,2.7161174105377244,1.2,0.0
+JoÃ£o Cancelo,DEF,Man City,58,0.0,0.0,0.0
+JoÃ£o Neves VirgÃ­nia,GK,Everton,39,0.0,0.0,0.0
+JoÃ£o Palhinha GonÃ§alves,MID,Fulham,50,1.3052173382602603,0.7999999999999999,0.0
+JoÃ£o Pedro Junqueira de Jesus,FWD,Brighton,52,0.3263602187303303,0.0,0.0
+Abdoulaye DoucourÃ©,MID,Everton,55,1.8247421490368916,1.019803902718557,0.0
+JoÃ«l Veltman,DEF,Brighton,43,1.956316366672875,1.7435595774162693,0.0
+JoÅ¡ko Gvardiol,DEF,Man City,48,0.004510784124216233,0.0,0.0
+Julio Enciso,MID,Brighton,50,0.5915808000915287,0.4898979485566356,0.0
+JuliÃ¡n Ãlvarez,FWD,Man City,65,2.669308637235118,1.469693845669907,0.0
+JurriÃ«n Timber,DEF,Arsenal,46,0.0,0.0,0.0
+Justin Hubner,DEF,Wolves,40,0.0,0.0,0.0
+ÄorÄe PetroviÄ,GK,Chelsea,45,1.8518227914260441,1.019803902718557,0.0
+JÃ©rÃ©my Doku,MID,Man City,64,1.0891979597632913,0.4,0.0
+JÃ³hann Berg Gudmundsson,MID,Burnley,48,0.519456480595777,0.6324555320336759,0.0
+Kacper KozÅowski,MID,Brighton,45,0.0,0.0,0.0
+Kaden Rodney,MID,Crystal Palace,45,0.0,0.0,0.0
+Kaelan Casey,DEF,West Ham,40,0.0,0.0,0.0
+Aaron Ramsey,MID,Burnley,50,0.07889035737286898,0.4,0.0
+Kaide Gordon,MID,Liverpool,45,0.0006185300350040545,0.0,0.0
+Kaine Kesler-Hayden,DEF,Aston Villa,40,0.0,0.0,0.0
+Kalvin Phillips,MID,West Ham,47,0.2425756434408924,0.7483314773547882,0.0
+Abdul Rahman Baba,DEF,Chelsea,40,0.0,0.0,0.0
+Karl Darlow,GK,Newcastle,40,0.0,0.0,0.0
+Karl Hein,GK,Arsenal,40,0.0,0.0,0.0
+Keane Lewis-Potter,MID,Brentford,47,1.5610421858526966,1.7204650534085253,0.0
+Keinan Davis,FWD,Aston Villa,49,0.0,0.0,0.0
+Kell Watts,DEF,Newcastle,40,0.0,0.0,0.0
+Kenny Tete,DEF,Fulham,44,0.4932573518235715,0.4,0.0
+Kepa Arrizabalaga,GK,Chelsea,50,0.0,0.0,0.0
+Kevin De Bruyne,MID,Man City,106,3.0725503115484694,2.1908902300206643,0.0
+Kevin Mbabu,DEF,Fulham,40,0.0,0.0,0.0
+Kevin Schade,MID,Brentford,52,4.5995187004934035e-10,0.0,0.0
+Ki-Jana Hoever,DEF,Wolves,40,0.0,0.0,0.0
+Kieffer Moore,FWD,Bournemouth,46,0.0007475254954353963,0.0,0.0
+Kieran Tierney,DEF,Arsenal,44,0.0,0.0,0.0
+Kieran Trippier,DEF,Newcastle,68,1.1076784956742856,1.469693845669907,0.0
+Kjell Scherpen,GK,Brighton,40,0.0,0.0,0.0
+Kobbie Mainoo,MID,Man Utd,44,2.293717560348272,0.7483314773547882,0.0
+Konstantinos Mavropanos,DEF,West Ham,45,0.5865497235464777,1.019803902718557,0.0
+Konstantinos Tsimikas,DEF,Liverpool,45,0.4493169465578203,0.4898979485566356,0.0
+Kortney Hause,DEF,Aston Villa,39,0.0,0.0,0.0
+Kristian Sekularac,MID,Fulham,44,0.0,0.0,0.0
+Adam Davies,GK,Sheffield Utd,40,0.0,0.0,0.0
+Adam Lallana,MID,Brighton,49,0.336148599741957,0.48989794855663565,0.0
+Adam Smith,DEF,Bournemouth,44,1.9523588172868893,1.8547236990991407,0.0
+Lawrence Vigouroux,GK,Burnley,39,0.0,0.0,0.0
+Leander Dendoncker,MID,Aston Villa,49,0.10064935476600327,0.0,0.0
+Adam Webster,DEF,Brighton,42,0.2424002525926605,0.4898979485566356,0.0
+Leigh Kavanagh,DEF,Brighton,40,0.0,0.0,0.0
+Leo Castledine,MID,Chelsea,45,0.0,0.0,0.0
+Adam Wharton,MID,Crystal Palace,50,2.1887747937881996,0.4898979485566356,0.0
+Leon Chiwome,FWD,Wolves,45,0.0,0.0,0.0
+Lesley Ugochukwu,MID,Chelsea,44,0.00011909341514667337,0.0,0.0
+Levi Colwill,DEF,Chelsea,47,0.8372792910326285,0.7483314773547882,0.0
+Adama TraorÃ©,MID,Fulham,49,1.6354382514971157,2.4,0.0
+Lewis Dobbin,MID,Everton,45,0.7627412925693959,0.4898979485566356,0.0
+Ademola Ola-Adebomi,FWD,Crystal Palace,45,0.0,0.0,0.0
+Lewis Hall,DEF,Newcastle,42,0.0009149243265541305,0.0,0.0
+Lewis Koumas,FWD,Liverpool,45,0.0,0.0,0.0
+Lewis Miley,MID,Newcastle,45,3.562313131376353,0.9797958971132712,0.0
+Lewis O'Brien,MID,Nott'm Forest,49,0.0,0.0,0.0
+Lewis Orford,MID,West Ham,45,0.0,0.0,0.0
+Lisandro MartÃ­nez,DEF,Man Utd,47,0.02261639552907428,0.0,0.0
+Lloyd Kelly,DEF,Bournemouth,45,0.1466103865160595,0.4,0.0
+Lorenz Assignon,DEF,Burnley,40,1.061019394569529,1.019803902718557,0.0
+Loris Karius,GK,Newcastle,39,0.13372733682379717,0.4,0.0
+Louie Marsh,FWD,Sheffield Utd,45,0.0,0.0,0.0
+Louie Watson,MID,Luton,44,0.0,0.0,0.0
+LoÃ¯c Mbe Soh,DEF,Nott'm Forest,40,0.0,0.0,0.0
+Luc De Fougerolles,DEF,Fulham,39,0.0,0.0,0.0
+Luca Barrington,MID,Brighton,45,0.0,0.0,0.0
+Luca Koleosho,MID,Burnley,48,0.10000408172205759,0.0,0.0
+Lucas BergstrÃ¶m,GK,Chelsea,39,0.0,0.0,0.0
+Admiral Muskwe,FWD,Luton,45,0.0,0.0,0.0
+Lucas Tolentino Coelho de Lima,MID,West Ham,60,2.586159052497886,1.9595917942265426,0.0
+AdriÃ¡n San Miguel del Castillo,GK,Liverpool,39,0.0,0.0,0.0
+Luis Sinisterra,MID,Bournemouth,55,0.7867459657097886,0.4898979485566356,0.0
+Lukasz Fabianski,GK,West Ham,42,0.10023603898681614,0.0,0.0
+Aidan Francis-Clarke,DEF,Luton,40,0.0,0.0,0.0
+Luke Chambers,DEF,Liverpool,40,0.0,0.0,0.0
+Luke Cundle,MID,Wolves,45,0.0,0.0,0.0
+Luke Freeman,MID,Luton,49,0.0,0.0,0.0
+Luke Harris,MID,Fulham,45,9.046830931624835e-11,0.0,0.0
+Luke McNally,DEF,Burnley,40,0.0,0.0,0.0
+Luke Plange,FWD,Crystal Palace,45,0.0,0.0,0.0
+Luke Shaw,DEF,Man Utd,52,0.11537781538882558,0.4,0.0
+Luke Thomas,DEF,Sheffield Utd,40,0.0002620125392288119,0.0,0.0
+Lyle Foster,FWD,Burnley,47,0.34993373785636306,0.4,0.0
+Mackenzie Hunt,MID,Everton,45,0.0,0.0,0.0
+Mads Bech SÃ¸rensen,DEF,Brentford,40,0.0,0.0,0.0
+Mads Bidstrup,MID,Brentford,45,0.0,0.0,0.0
+Mads Juel Andersen,DEF,Luton,39,1.688625442640137e-05,0.0,0.0
+Albert Sambi Lokonga,MID,Luton,49,0.1545656344169346,0.8,0.0
+Mahamadou Susoho,MID,Man City,45,0.0,0.0,0.0
+Mahmoud Dahoud,MID,Brighton,48,4.428157494111158e-06,0.0,0.0
+Malang Sarr,DEF,Chelsea,43,0.0,0.0,0.0
+Malcolm Ebiowei,MID,Crystal Palace,44,0.0,0.0,0.0
+Alejo VÃ©liz,FWD,Spurs,54,0.0008501837210840609,0.0,0.0
+Manor Solomon,MID,Spurs,51,4.0997243130596145e-09,0.0,0.0
+Aaron Cresswell,DEF,West Ham,42,0.5442665953500727,0.4898979485566356,0.0
+Manuel Benson Hedilazio,MID,Burnley,52,0.18934947870646524,0.4898979485566356,0.0
+Marc Cucurella Saseta,DEF,Chelsea,48,0.6002080044510137,0.4,0.0
+Marc GuÃ©hi,DEF,Crystal Palace,42,0.003839393134367324,0.0,0.0
+Marcelo de AraÃºjo Pitaluga Filho,GK,Liverpool,40,0.0,0.0,0.0
+Marcos Senesi,DEF,Bournemouth,46,0.8729543084995879,0.4898979485566356,0.0
+Marcus Bettinelli,GK,Chelsea,40,-0.00012872318976231892,0.0,0.0
+Marcus Oliveira Alencar,MID,Arsenal,45,0.0,0.0,0.0
+Alex Matos,MID,Chelsea,45,4.920973629046712e-09,0.0,0.0
+Marcus Tavernier,MID,Bournemouth,54,2.339698286307246,0.4,0.0
+Marek RodÃ¡k,GK,Fulham,39,-1.8093661862975883e-11,0.0,0.0
+Mario Lemina,MID,Wolves,49,2.1529905062495347,0.6324555320336759,0.0
+Mark Flekken,GK,Brentford,45,2.273421501144396,0.8,0.0
+Mark Gillespie,GK,Newcastle,39,0.0,0.0,0.0
+Mark OâMahony,FWD,Brighton,45,0.0,0.0,0.0
+Mark Travers,GK,Bournemouth,40,0.0,0.0,0.0
+Alex Mighten,MID,Nott'm Forest,44,0.0,0.0,0.0
+Alex Murphy,DEF,Newcastle,39,3.756679392569859e-07,0.0,0.0
+Marvelous Nakamba,MID,Luton,43,2.209110715152095e-06,0.0,0.0
+Mason Burstow,FWD,Chelsea,45,1.7636769474410356e-10,0.0,0.0
+Mason Holgate,DEF,Sheffield Utd,40,-0.35944634265072833,1.7435595774162693,0.0
+Mason Mount,MID,Man Utd,68,2.5267558271990646e-07,0.0,0.0
+Mateo KovaÄiÄ,MID,Man City,47,0.8646738963869202,1.0954451150103321,0.0
+Matheus FranÃ§a de Oliveira,MID,Crystal Palace,48,1.0801313467927904,2.6076809620810595,0.0
+Matheus Luiz Nunes,MID,Man City,47,0.3789386505035624,1.2,0.0
+Matheus Santos Carneiro Da Cunha,FWD,Wolves,55,0.4384128535723792,0.4,0.0
+Mathias Jensen,MID,Brentford,54,1.587747044480675,0.4898979485566356,0.0
+Mathias Jorgensen,DEF,Brentford,43,0.4415326030011852,0.6324555320336759,0.0
+Matija Å arkiÄ,GK,Wolves,40,0.0,0.0,0.0
+Matt Doherty,DEF,Wolves,43,0.7120964994332181,0.4,0.0
+Matt Macey,GK,Luton,40,0.0,0.0,0.0
+Matt Ritchie,MID,Newcastle,43,0.825936563009038,2.4,0.0
+Matt Targett,DEF,Newcastle,42,3.886231336498971e-09,0.0,0.0
+Matt Turner,GK,Nott'm Forest,39,0.0015615630656087196,0.0,0.0
+Matthew Cox,GK,Brentford,40,0.0,0.0,0.0
+Matthew Dibley-Dias,MID,Fulham,45,0.0,0.0,0.0
+Matthew Whittingham,MID,Wolves,45,0.0,0.0,0.0
+Matty Cash,DEF,Aston Villa,46,1.0163314961609404,0.6324555320336759,0.0
+Alex Scott,MID,Bournemouth,49,1.2299179136626859,0.0,0.0
+Mauro Bandeira,MID,Arsenal,45,0.0,0.0,0.0
+Max Aarons,DEF,Bournemouth,44,3.6112887778245204e-06,0.0,0.0
+Max Kilman,DEF,Wolves,45,1.8658048175334652,1.8547236990991407,0.0
+Max Kinsey,DEF,Bournemouth,40,0.0,0.0,0.0
+Max Lowe,DEF,Sheffield Utd,43,0.49655182496515055,1.9999999999999998,0.0
+Maxime Esteve,DEF,Burnley,40,1.133245590964953,0.7483314773547882,0.0
+Maxwel Cornet,MID,West Ham,52,0.08196318689414694,0.4,0.0
+Micah Hamilton,MID,Man City,45,0.0,0.0,0.0
+Michael Keane,DEF,Everton,43,0.10049815732807356,0.0,0.0
+Michael Ndiweni,FWD,Newcastle,44,5.163863712072798e-07,0.0,0.0
+Michael Obafemi,FWD,Burnley,49,3.528139548446858e-07,0.0,0.0
+Michael Olakigbe,MID,Brentford,45,5.974900376464329e-05,0.0,0.0
+Michael Olise,MID,Crystal Palace,56,0.5253297603374907,0.0,0.0
+Alex Telles,DEF,Man Utd,45,0.0,0.0,0.0
+MichaÅ Karbownik,DEF,Brighton,40,0.0,0.0,0.0
+Micky van de Ven,DEF,Spurs,44,1.0552849944640217,0.7483314773547882,0.0
+Miguel AlmirÃ³n Rejala,MID,Newcastle,61,2.351099071032621,0.4898979485566356,0.0
+Mike TrÃ©sor,MID,Burnley,53,0.00033893288174711804,0.0,0.0
+Mikkel Damsgaard,MID,Brentford,48,0.7118510078432868,1.469693845669907,0.0
+Alexandre Moreno Lopera,DEF,Aston Villa,52,1.4144755409854366,1.019803902718557,0.0
+Mohamed DrÃ¤ger,DEF,Nott'm Forest,40,0.0,0.0,0.0
+Mohamed Elneny,MID,Arsenal,44,0.17675771664770523,0.4898979485566356,0.0
+Alfie Dorrington,DEF,Spurs,40,0.0,0.0,0.0
+Mohammed Kudus,MID,West Ham,68,2.4318316495970573,1.8330302779823362,0.0
+MoisÃ©s Caicedo Corozo,MID,Chelsea,45,1.9869570582200313,1.0954451150103321,0.0
+Alfie Doughty,DEF,Luton,47,1.8908537702065953,1.4966629547095764,0.0
+Morgan Rogers,MID,Aston Villa,50,1.0783301937810144,0.7999999999999999,0.0
+Morgan Sanson,MID,Aston Villa,45,0.0,0.0,0.0
+Moussa Diaby,MID,Aston Villa,63,3.0872914609970312,1.469693845669907,0.0
+Alfie Gilchrist,DEF,Chelsea,40,0.26537481178356825,0.4898979485566356,0.0
+Alfie Whiteman,GK,Spurs,39,0.0,0.0,0.0
+Alisson Ramses Becker,GK,Liverpool,58,0.1165531252793316,0.0,0.0
+Myles Lewis-Skelly,MID,Arsenal,45,0.0,0.0,0.0
+Myles Peart-Harris,MID,Brentford,45,1.60338360304354e-05,0.0,0.0
+MÃ¡ximo Perrone,MID,Man City,44,0.0,0.0,0.0
+Naouirou Ahamada,MID,Crystal Palace,43,0.6118865157846178,0.4,0.0
+Allan Campbell,MID,Luton,49,0.0,0.0,0.0
+Nathan Collins,DEF,Brentford,45,0.9333554013656549,0.48989794855663565,0.0
+Nathan Fraser,FWD,Wolves,45,0.9455752662754943,0.7999999999999999,0.0
+Nathan Patterson,DEF,Everton,43,0.0014683864297166819,0.0,0.0
+Nathan Redmond,MID,Burnley,47,4.7430256728964054e-05,0.0,0.0
+Nathaniel Clyne,DEF,Crystal Palace,43,0.0014035195198597032,0.0,0.0
+Nathaniel Phillips,DEF,Liverpool,40,0.0,0.0,0.0
+Nayef Aguerd,DEF,West Ham,44,0.2535488346768993,0.4898979485566356,0.0
+Neal Maupay,FWD,Brentford,49,1.7641880472143934,1.9390719429665317,0.0
+Neco Williams,DEF,Nott'm Forest,43,2.250687041295187,1.6733200530681511,0.0
+Nick Pope,GK,Newcastle,53,7.857689957374387e-06,0.0,0.0
+Allan Saint-Maximin,MID,Newcastle,60,0.0,0.0,0.0
+Nicolas PÃ©pÃ©,MID,Arsenal,49,0.0,0.0,0.0
+NicolÃ¡s DomÃ­nguez,MID,Nott'm Forest,50,2.2641573609900707,1.4966629547095764,0.0
+NicolÃ² Zaniolo,MID,Aston Villa,54,2.7688353988209022,1.8547236990991407,0.0
+Nikola VlaÅ¡iÄ,MID,West Ham,45,0.0,0.0,0.0
+Noha Lemina,MID,Wolves,50,0.0,0.0,0.0
+Noni Madueke,MID,Chelsea,53,0.14152939028981462,0.4,0.0
+Norberto Bercique Gomes Betuncal,FWD,Everton,57,1.9954286008503581,1.3564659966250534,0.0
+Altay Bayindir,GK,Man Utd,40,0.0,0.0,0.0
+Amad Diallo,MID,Man Utd,44,0.13361758076751742,0.4,0.0
+Amadou Diallo,MID,Newcastle,45,5.163862381355022e-07,0.0,0.0
+Odsonne Edouard,FWD,Crystal Palace,54,1.0798367710363383,0.4898979485566356,0.0
+Odysseas Vlachodimos,GK,Nott'm Forest,45,1.503730711509265e-06,0.0,0.0
+Oleksandr Zinchenko,DEF,Arsenal,50,0.7378981276785457,0.4,0.0
+Oliver Arblaster,MID,Sheffield Utd,45,1.3142896948468632,0.82915619758885,0.0
+Oliver McBurnie,FWD,Sheffield Utd,54,1.0008864364061867,0.4898979485566356,0.0
+Oliver Norwood,MID,Sheffield Utd,48,0.8670789893753678,0.6324555320336759,0.0
+Oliver Scarles,DEF,West Ham,40,0.0,0.0,0.0
+Oliver Skipp,MID,Spurs,45,0.007545922448124441,0.0,0.0
+Oliwier Zych,GK,Aston Villa,40,0.0,0.0,0.0
+Ollie Harrison,MID,Chelsea,45,0.0,0.0,0.0
+Amara Nallo,DEF,Liverpool,40,0.0,0.0,0.0
+Olu Aina,DEF,Nott'm Forest,45,0.10034395456928556,0.0,0.0
+Omar Richards,DEF,Nott'm Forest,44,0.0,0.0,0.0
+Omari Forson,MID,Man Utd,44,0.3562512757571435,0.4898979485566356,0.0
+Omari Kellyman,MID,Aston Villa,45,0.0,0.0,0.0
+Orel Mangala,MID,Nott'm Forest,50,0.10178702437533012,0.0,0.0
+Oscar Bobb,MID,Man City,44,0.5826642397320314,1.16619037896906,0.0
+Owen Beck,DEF,Liverpool,45,0.0006578960224733811,0.0,0.0
+Owen Dodgson,DEF,Burnley,40,0.0,0.0,0.0
+Owen Hesketh,MID,Wolves,45,0.0,0.0,0.0
+Pablo Fornals Malla,MID,West Ham,46,0.0006878598189555305,0.0,0.0
+Amari'i Bell,DEF,Luton,39,0.15403743739988277,0.4898979485566356,0.0
+Ameen Al-Dakhil,DEF,Burnley,38,0.0046893013897728745,0.0,0.0
+Anass Zaroury,MID,Burnley,46,0.0004642334695384148,0.0,0.0
+Pau Torres,DEF,Aston Villa,46,1.4705217560270645,0.8944271909999159,0.0
+Paul Dummett,DEF,Newcastle,39,3.756679392569859e-07,0.0,0.0
+Pedro Lomba Neto,MID,Wolves,57,1.6450760137445377,1.4966629547095764,0.0
+Andi Zeqiri,FWD,Brighton,44,0.0,0.0,0.0
+Pelly Ruddock Mpanzu,MID,Luton,47,0.6611185410018333,0.4898979485566356,0.0
+Andre Brooks,MID,Sheffield Utd,44,0.3692824588924184,0.4898979485566356,0.0
+Andreas Hoelgebaum Pereira,MID,Fulham,53,2.9804284368740173,0.4898979485566356,0.0
+Philip Billing,MID,Bournemouth,51,0.9233708991451934,0.4898979485566356,0.0
+Philippe Coutinho Correia,MID,Aston Villa,58,9.932104618097927e-12,0.0,0.0
+Pierre-Emerick Aubameyang,FWD,Chelsea,65,0.0,0.0,0.0
+Pierre-Emile HÃ¸jbjerg,MID,Spurs,52,1.1766519103586017,0.0,0.0
+Radek VÃ­tek,GK,Man Utd,40,0.0,0.0,0.0
+Radu Dragusin,DEF,Spurs,42,0.5984657347778014,0.4,0.0
+Andrew Omobamidele,DEF,Nott'm Forest,45,0.30177774561439974,1.019803902718557,0.0
+Andrew Robertson,DEF,Liverpool,64,1.5342302243920893,1.32664991614216,0.0
+Andrey Nascimento dos Santos,MID,Chelsea,42,7.689021290113331e-08,0.0,0.0
+Andros Townsend,MID,Luton,50,1.2304229561537416,1.3564659966250536,0.0
+RaÃºl JimÃ©nez,FWD,Fulham,50,0.7929886531332562,0.4,0.0
+AndrÃ© Tavares Gomes,MID,Everton,44,0.671638134691323,0.4898979485566356,0.0
+Reece James,DEF,Chelsea,53,2.752856727699092e-05,0.0,0.0
+Reiss Nelson,MID,Arsenal,48,0.6030218313735038,0.4,0.0
+Remi Matthews,GK,Crystal Palace,39,6.740414300208573e-06,0.0,0.0
+Remo Freuler,MID,Nott'm Forest,49,0.0,0.0,0.0
+Reuell Walters,DEF,Arsenal,40,0.0,0.0,0.0
+Rhian Brewster,FWD,Sheffield Utd,49,0.5167748418489309,0.7483314773547882,0.0
+Rhys Bennett,DEF,Man Utd,40,0.0,0.0,0.0
+Rhys Norrington-Davies,DEF,Sheffield Utd,39,0.09611609449251085,0.4,0.0
+Richarlison de Andrade,MID,Spurs,69,1.651285650832845,0.8944271909999159,0.0
+Richie Laryea,DEF,Nott'm Forest,45,0.0,0.0,0.0
+Rico Henry,DEF,Brentford,43,2.6967723492273397e-10,0.0,0.0
+Rico Lewis,DEF,Man City,42,0.10126996886952723,0.0,0.0
+Riyad Mahrez,MID,Man City,75,0.0,0.0,0.0
+Rob Holding,DEF,Crystal Palace,43,0.0,0.0,0.0
+Robert SÃ¡nchez,GK,Chelsea,45,0.10016097228926678,0.0,0.0
+Robin Olsen,GK,Aston Villa,39,3.825793590237781e-11,0.0,0.0
+Rodrigo Bentancur,MID,Spurs,54,0.7681651109781739,0.6324555320336759,0.0
+Rodrigo Duarte Ribeiro,FWD,Nott'm Forest,45,0.0018190839949238779,0.0,0.0
+Andy Lonergan,GK,Everton,39,0.0,0.0,0.0
+Anel AhmedhodÅ¾iÄ,DEF,Sheffield Utd,43,0.30334731542895943,1.019803902718557,0.0
+Romain Faivre,MID,Bournemouth,50,0.16395424223678556,0.4,0.0
+Romelu Lukaku Bolingoli,FWD,Chelsea,68,0.0,0.0,0.0
+RomÃ©o Lavia,MID,Chelsea,49,0.0002933128849152028,0.0,0.0
+Ronnie Stutter,FWD,Chelsea,45,0.0,0.0,0.0
+Ross Barkley,MID,Luton,50,2.8530175233961668,2.0,0.0
+Angelo Ogbonna,DEF,West Ham,43,0.11281366273456096,0.4,0.0
+Ryan Fraser,MID,Newcastle,49,0.0,0.0,0.0
+Ryan Fredericks,DEF,Bournemouth,43,0.0,0.0,0.0
+Ryan Giles,DEF,Luton,42,1.9952314885747154e-05,0.0,0.0
+Ryan Gravenberch,MID,Liverpool,50,0.4015124159533228,0.8,0.0
+Ryan OnÃ©,MID,Sheffield Utd,44,2.7398872414140816e-08,0.0,0.0
+Ryan Sessegnon,DEF,Spurs,44,0.0,0.0,0.0
+Ryan Trevitt,MID,Brentford,45,0.0,0.0,0.0
+Ryan Yates,MID,Nott'm Forest,48,2.2238697079965575,0.4898979485566356,0.0
+Anis Slimane,MID,Sheffield Utd,47,0.0022002082502254926,0.0,0.0
+RÃºnar Alex RÃºnarsson,GK,Arsenal,40,0.0,0.0,0.0
+Sam Curtis,DEF,Sheffield Utd,40,0.0,0.0,0.0
+Anssumane Fati Vieira,MID,Brighton,64,0.6395976032627352,1.3564659966250536,0.0
+Sam Proctor,GK,Aston Villa,40,0.0,0.0,0.0
+Sam Surridge,FWD,Nott'm Forest,45,0.0,0.0,0.0
+Saman Ghoddos,MID,Brentford,45,0.30891978194396347,0.4898979485566356,0.0
+Samuel Bastien,MID,Burnley,49,0.0,0.0,0.0
+Sander Berge,MID,Burnley,46,1.4956489699040998,0.4,0.0
+Sandro Tonali,MID,Newcastle,52,2.712768700514459e-08,0.0,0.0
+Santiago Bueno,DEF,Wolves,45,0.34646774917479256,0.4,0.0
+Sasa Kalajdzic,FWD,Wolves,49,0.1000066540259457,0.0,0.0
+SaÃ¯d Benrahma,MID,West Ham,56,0.0002187192676825804,0.0,0.0
+Anthony Elanga,MID,Nott'm Forest,51,2.7490953023157156,1.7435595774162693,0.0
+Scott Carson,GK,Man City,38,0.0,0.0,0.0
+Scott McKenna,DEF,Nott'm Forest,44,6.163760470752534e-10,0.0,0.0
+Scott McTominay,MID,Man Utd,46,2.163475146243563,1.8547236990991405,0.0
+Scott Twine,MID,Burnley,49,0.0,0.0,0.0
+Seamus Coleman,DEF,Everton,44,0.0068749264808134905,0.0,0.0
+Sean Longstaff,MID,Newcastle,48,3.125833215748776,0.4,0.0
+Sepp van den Berg,DEF,Liverpool,40,0.0,0.0,0.0
+Serge Aurier,DEF,Nott'm Forest,45,1.0814028283059225e-06,0.0,0.0
+Sergi CanÃ³s TenÃ©s,MID,Brentford,50,0.0,0.0,0.0
+Sergio GÃ³mez,DEF,Man City,38,0.0005320218421074376,0.0,0.0
+Sergio ReguilÃ³n,DEF,Brentford,44,-0.5263628858388922,2.5768197453450252,0.0
+Shandon Baptiste,MID,Brentford,43,1.2887599681276105,1.2,0.0
+Shea Charles,MID,Man City,45,0.0,0.0,0.0
+Shola Shoretire,FWD,Man Utd,44,0.0,0.0,0.0
+Anthony Knockaert,MID,Fulham,44,0.0,0.0,0.0
+Siriki DembÃ©lÃ©,MID,Bournemouth,45,0.0,0.0,0.0
+Sofyan Amrabat,MID,Man Utd,50,0.8300980386015815,0.4,0.0
+Solly March,MID,Brighton,61,3.0594904348577245e-08,0.0,0.0
+Anthony Martial,FWD,Man Utd,64,0.10001209971414624,0.0,0.0
+Stefan Bajcetic,MID,Liverpool,47,0.0,0.0,0.0
+Stefan Ortega Moreno,GK,Man City,37,0.7941856348547537,0.8,0.0
+Steve Cook,DEF,Nott'm Forest,45,0.0,0.0,0.0
+Steven Alzate,MID,Brighton,44,0.0,0.0,0.0
+Steven Benda,GK,Fulham,40,0.0,0.0,0.0
+Antony Matheus dos Santos,MID,Man Utd,68,0.7830965538329691,0.4898979485566356,0.0
+Sydie Peck,MID,Sheffield Utd,44,6.689222652548637e-06,0.0,0.0
+Antwoine Hackford,FWD,Sheffield Utd,44,2.5138574759243455e-11,0.0,0.0
+Aribim Pepple,FWD,Luton,45,0.0,0.0,0.0
+Takehiro Tomiyasu,DEF,Arsenal,45,0.10018441692051086,0.0,0.0
+Tanguy NdombÃ©lÃ© Alvaro,MID,Spurs,44,0.0,0.0,0.0
+Tariq Lamptey,DEF,Brighton,39,1.080822234443766,2.227105745132009,0.0
+Tawanda Chirewa,MID,Wolves,44,0.19210458304494096,0.4,0.0
+Tayo Adaramola,DEF,Crystal Palace,40,0.0,0.0,0.0
+Teden Mengi,DEF,Luton,39,1.172029032031256,0.7483314773547882,0.0
+Terence Kongolo,DEF,Fulham,40,0.0,0.0,0.0
+Thiago AlcÃ¡ntara do Nascimento,MID,Liverpool,47,0.003863279219779801,0.0,0.0
+Arijanet Muric,GK,Burnley,43,1.3436769383524656,1.2,0.0
+Thilo Kehrer,DEF,West Ham,42,8.471512831269116e-11,0.0,0.0
+Thomas Cannon,FWD,Everton,45,4.096197235082123e-11,0.0,0.0
+Thomas Kaminski,GK,Luton,45,1.668365444131801,1.019803902718557,0.0
+Thomas Partey,MID,Arsenal,48,0.517455000383007,0.4898979485566356,0.0
+Thomas Strakosha,GK,Brentford,39,3.6631949714951083e-08,0.0,0.0
+Tim Iroegbunam,MID,Aston Villa,44,0.4948171594782657,0.48989794855663565,0.0
+Tim Krul,GK,Luton,44,0.0,0.0,0.0
+Tim Ream,DEF,Fulham,45,0.11009711096914537,0.4,0.0
+Armando Broja,FWD,Fulham,49,1.1600675403321574,1.5491933384829666,0.0
+Arnaut Danjuma Groeneveld,MID,Everton,52,0.006631144178220684,0.0,0.0
+Ashley Phillips,DEF,Spurs,40,0.0,0.0,0.0
+Toby Collyer,MID,Man Utd,45,0.0,0.0,0.0
+Tom Cairney,MID,Fulham,49,0.21587355638762895,1.019803902718557,0.0
+Tom Davies,MID,Sheffield Utd,50,0.9906764787061882,0.4,0.0
+Tom Heaton,GK,Man Utd,40,0.0,0.0,0.0
+Tom King,GK,Wolves,39,0.0,0.0,0.0
+Tom Lockyer,DEF,Luton,42,2.4590722603994693e-06,0.0,0.0
+Tom McGill,GK,Brighton,39,0.0,0.0,0.0
+Tommi O'Reilly,MID,Aston Villa,45,0.0,0.0,0.0
+Tommy Doyle,MID,Wolves,44,1.337643610262367,0.7483314773547882,0.0
+TomÃ¡Å¡ SouÄek,MID,West Ham,49,2.293524924529286,2.244994432064365,0.0
+Ashley Young,DEF,Everton,44,1.3753741815404048,2.0976176963403033,0.0
+Auston Trusty,DEF,Sheffield Utd,39,0.5478431665905792,1.019803902718557,0.0
+Travis Hernes,MID,Newcastle,45,0.0,0.0,0.0
+Trent Alexander-Arnold,DEF,Liverpool,85,0.9048235644224993,1.6,0.0
+Trevoh Chalobah,DEF,Chelsea,43,1.0933824000137995,0.4898979485566356,0.0
+Treymaurice Nyoni,MID,Liverpool,45,0.0,0.0,0.0
+Ty Barnett,MID,Wolves,45,0.0,0.0,0.0
+Tyler Adams,MID,Bournemouth,49,0.08927195007045567,0.4,0.0
+Tyler Onyango,MID,Everton,44,1.6384788940328487e-11,0.0,0.0
+Tyrell Malacia,DEF,Man Utd,43,0.0,0.0,0.0
+Tyrese Francois,MID,Fulham,44,0.0,0.0,0.0
+Tyrick Mitchell,DEF,Crystal Palace,45,2.9237532586913213,1.4966629547095764,0.0
+Tyrone Mings,DEF,Aston Villa,41,0.0,0.0,0.0
+ValentÃ­n Barco,DEF,Brighton,40,0.0,0.0,0.0
+Valintino Adedokun,DEF,Brentford,40,0.0,0.0,0.0
+Vicente Guaita,GK,Crystal Palace,44,0.0,0.0,0.0
+Axel Piesold,MID,Luton,45,0.0,0.0,0.0
+Aymeric Laporte,DEF,Man City,49,5.84963548404115e-12,0.0,0.0
+Viljami Sinisalo,GK,Aston Villa,40,0.0,0.0,0.0
+Vincent Angelini,GK,Brentford,40,0.0,0.0,0.0
+Bailey Peacock-Farrell,GK,Burnley,40,0.0,0.0,0.0
+Bashir Humphreys,DEF,Chelsea,40,0.0,0.0,0.0
+Aaron Connolly,FWD,Brighton,45,0.0,0.0,0.0
+Vitaly Janelt,MID,Brentford,53,1.290102452232403,0.4898979485566356,0.0
+Ben Brereton,MID,Sheffield Utd,50,0.5117546102779439,0.4,0.0
+Wataru Endo,MID,Liverpool,54,1.6474900509691799,0.48989794855663565,0.0
+Wayne Hennessey,GK,Nott'm Forest,39,0.0,0.0,0.0
+Wes Foderingham,GK,Sheffield Utd,45,0.6350339561082101,1.2649110640673518,0.0
+Wesley Fofana,DEF,Chelsea,44,0.0,0.0,0.0
+Wesley Moraes Ferreira da Silva,FWD,Aston Villa,50,0.0,0.0,0.0
+Wesley Okoduwa,DEF,Wolves,40,0.0,0.0,0.0
+Will Hughes,MID,Crystal Palace,49,0.6751471861275727,0.7483314773547883,0.0
+William Osula,FWD,Sheffield Utd,43,1.0108826333580574,0.4,0.0
+Ben Chilwell,DEF,Chelsea,54,0.958984971632366,0.8944271909999159,0.0
+Willian Borges da Silva,MID,Fulham,53,2.1028298894419284,0.9797958971132712,0.0
+Willy Boly,DEF,Nott'm Forest,45,1.0806748004003315,0.8,0.0
+Willy Kambwala,DEF,Man Utd,39,0.43835829149527994,0.4,0.0
+Aaron Ramsdale,GK,Arsenal,45,0.9741617118969507,1.2,0.0
+Aaron Hickey,DEF,Brentford,44,7.5113807973467e-08,0.0,0.0
+Yago de Santiago Alonso,MID,Spurs,45,0.0,0.0,0.0
+Yasin Ayari,MID,Brighton,45,0.0,0.0,0.0
+Yasser Larouci,DEF,Sheffield Utd,43,0.42263367612493447,0.8,0.0
+Yegor Yarmoliuk,MID,Brentford,43,0.7833663976628858,0.4898979485566356,0.0
+Yerson Mosquera,DEF,Wolves,40,0.0,0.0,0.0
+Ben Davies,DEF,Spurs,43,0.2596015257227086,0.4898979485566356,0.0
+Youri Tielemans,MID,Aston Villa,56,1.8590806607956991,1.469693845669907,0.0
+Youssef Ramalho Chermiti,FWD,Everton,48,0.764925707719631,0.4898979485566356,0.0
+Yves Bissouma,MID,Spurs,50,1.9711219473644548,0.7483314773547882,0.0
+Zack Nelson,MID,Luton,45,0.11706246032038432,0.4,0.0
+Zack Steffen,GK,Man City,39,0.0,0.0,0.0
+Zeki Amdouni,FWD,Burnley,53,0.4704213197391788,0.4898979485566356,0.0
+Ãlvaro FernÃ¡ndez Carreras,DEF,Man Utd,40,0.0,0.0,0.0
+Ãngelo Gabriel Borges Damaceno,MID,Chelsea,50,0.0,0.0,0.0
+Aaron Wan-Bissaka,DEF,Man Utd,44,0.1003693649505255,0.0,0.0
