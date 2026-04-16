@@ -194,12 +194,15 @@ for i, pred_season in enumerate(season_order):
             [features + ["total_points"]]
             .dropna()
         )
+        tr = tr.loc[:, ~tr.columns.duplicated()].reset_index(drop=True)
+
         te = (
             test_df[test_df["FPL_pos"] == pos]
-            [features + ["total_points", "player", "date", "season_x", "FPL_pos"]]
+            [features + ["total_points", "player", "date", "season_x", "FPL_pos", "price"]]
             .dropna(subset=features)
             .copy()
         )
+        te = te.loc[:, ~te.columns.duplicated()].reset_index(drop=True)
 
         if len(tr) < 200 or len(te) == 0:
             print(f"  {pos}: insufficient data, skipping")
@@ -220,7 +223,7 @@ for i, pred_season in enumerate(season_order):
         print(f"  {pos:3s}  |  MAE: {mae:.3f}  |  Corr: {corr:.3f}  |  n={len(te):,}")
 
         all_predictions.append(
-            te[["player", "FPL_pos", "date", "gameweek", "season_x", "xPts", "total_points"]]
+            te[["player", "FPL_pos", "date", "gameweek", "season_x", "xPts", "total_points", "price"]]
         )
 
 # =============================================================================
@@ -299,3 +302,385 @@ def get_best_xi(df, gameweek, season=None):
 
 # Example usage
 get_best_xi(output, gameweek=10, season="2023-24")
+get_best_xi(output, gameweek=38, season="2024-25")
+
+# =============================================================================
+# 8. BEST XI SELECTOR WITH BUDGET CONSTRAINT
+# =============================================================================
+def get_best_xi_budget_greedy(df, gameweek, season=None, budget=83.0):
+    """
+    Select the best XI within a budget cap using a greedy approach
+    that iteratively fills each position with the best available player
+    that keeps the remaining budget feasible.
+
+    Parameters
+    ----------
+    df       : DataFrame output from the model (must contain 'price' column)
+    gameweek : int
+    season   : str or None
+    budget   : float — total squad budget in £m (default 83.0, i.e. 100m minus 4 subs)
+    """
+    FORMATIONS = [(3,4,3),(3,5,2),(4,4,2),(4,3,3),(5,3,2),(5,4,1)]
+
+    # Filter to the right gameweek/season
+    df_gw = df.copy()
+    if season:
+        df_gw = df_gw[df_gw["season_x"] == season]
+    df_gw = df_gw[df_gw["gameweek"] == gameweek].dropna(subset=["xPts", "price"])
+
+    # Sort each position group by xPts descending for greedy selection
+    by_pos = {pos: df_gw[df_gw["FPL_pos"] == pos].sort_values("xPts", ascending=False)
+              for pos in ["GK", "DEF", "MID", "FWD"]}
+
+    def greedy_pick(pos_group, n, budget_remaining, slots_remaining):
+        """
+        Pick n players from pos_group such that budget_remaining is not
+        exceeded AND enough budget is left for the remaining slots.
+        Returns selected rows or None if impossible.
+        """
+        selected = []
+        remaining_pool = pos_group.copy()
+
+        for _ in range(n):
+            slots_after_this = slots_remaining - 1
+            # After picking this player we need at least £4.0m per remaining slot
+            min_budget_after = slots_after_this * 4.0
+
+            feasible = remaining_pool[
+                remaining_pool["price"] <= (budget_remaining - min_budget_after)
+            ]
+            if feasible.empty:
+                return None
+
+            pick = feasible.iloc[0]  # best xPts within budget
+            selected.append(pick)
+            budget_remaining -= pick["price"]
+            slots_remaining  -= 1
+            remaining_pool    = remaining_pool[remaining_pool["player"] != pick["player"]]
+
+        return pd.DataFrame(selected), budget_remaining
+
+    best_team, best_score, best_formation = None, -np.inf, None
+
+    for d, m, f in FORMATIONS:
+        slots = [("GK", 1), ("DEF", d), ("MID", m), ("FWD", f)]
+        total_slots = 11
+        budget_left = budget
+        team_parts  = []
+        failed      = False
+
+        for pos, n in slots:
+            slots_left_after = total_slots - sum(s for _, s in slots[:slots.index((pos,n))+1])
+            result = greedy_pick(by_pos[pos], n, budget_left, n + slots_left_after)
+            if result is None:
+                failed = True
+                break
+            picked, budget_left = result
+            team_parts.append(picked)
+
+        if failed:
+            continue
+
+        team  = pd.concat(team_parts)
+        if len(team) != 11:
+            continue
+
+        score = team["xPts"].sum()
+        if score > best_score:
+            best_score, best_team, best_formation = score, team, (d, m, f)
+
+    if best_team is None:
+        print(f"No valid team found within £{budget}m budget")
+        return None
+
+    captain   = best_team.loc[best_team["xPts"].idxmax()]
+    total_pts = best_score + captain["xPts"]
+    spent     = best_team["price"].sum()
+
+    label = f"GW{gameweek}" + (f" {season}" if season else "")
+    print(f"\nBest XI (Budget: £{budget}m) — {label}")
+    print(f"Formation  : {best_formation[0]}-{best_formation[1]}-{best_formation[2]}")
+    print(
+        best_team
+        .sort_values("xPts", ascending=False)
+        [["player", "FPL_pos", "xPts", "price"]]
+        .to_string(index=False)
+    )
+    print(f"\nCaptain    : {captain['player']} ({captain['xPts']:.2f} xPts)")
+    print(f"Total xPts : {total_pts:.2f}  (with captain double)")
+    print(f"Spent      : £{spent:.1f}m / £{budget:.1f}m  (£{budget - spent:.1f}m remaining)")
+
+    return best_team, best_formation, total_pts
+
+
+# Example usage
+get_best_xi_budget_greedy(output, gameweek=10, season="2023-24", budget=83.0)
+get_best_xi_budget_greedy(output, gameweek=38, season="2024-25", budget=83.0)
+
+# =============================================================================
+# 10. BEST XI SELECTOR WITH BUDGET CONSTRAINT (ILP - OPTIMAL)
+# =============================================================================
+from pulp import LpProblem, LpVariable, LpMaximize, lpSum, value, PULP_CBC_CMD
+
+def get_best_xi_budget(df, gameweek, season=None, budget=83.0):
+    """
+    Select the globally optimal XI within a budget cap using Integer Linear
+    Programming. Guaranteed to find the best possible team unlike greedy.
+
+    Parameters
+    ----------
+    df       : DataFrame output from the model (must contain 'price' column)
+    gameweek : int
+    season   : str or None
+    budget   : float — total XI budget in £m (default 83.0)
+    """
+    FORMATIONS = [(3,4,3),(3,5,2),(4,4,2),(4,3,3),(5,3,2),(5,4,1)]
+
+    # Filter to gameweek/season
+    df_gw = df.copy()
+    if season:
+        df_gw = df_gw[df_gw["season_x"] == season]
+    df_gw = (
+        df_gw[df_gw["gameweek"] == gameweek]
+        .dropna(subset=["xPts", "price"])
+        .reset_index(drop=True)
+    )
+
+    if df_gw.empty:
+        print("No players found for this gameweek/season.")
+        return None
+
+    players  = df_gw.index.tolist()
+    xpts     = df_gw["xPts"].to_dict()
+    prices   = df_gw["price"].to_dict()
+    pos_map  = df_gw["FPL_pos"].to_dict()
+
+    best_team, best_score, best_formation = None, -np.inf, None
+
+    for (d, m, f) in FORMATIONS:
+        prob = LpProblem(f"BestXI_{d}{m}{f}", LpMaximize)
+
+        # Binary variable: 1 if player is selected
+        x = {i: LpVariable(f"x_{i}", cat="Binary") for i in players}
+
+        # Objective: maximise total xPts
+        prob += lpSum(xpts[i] * x[i] for i in players)
+
+        # Budget constraint
+        prob += lpSum(prices[i] * x[i] for i in players) <= budget
+
+        # Exactly 11 players
+        prob += lpSum(x[i] for i in players) == 11
+
+        # Positional constraints
+        gk_players  = [i for i in players if pos_map[i] == "GK"]
+        def_players = [i for i in players if pos_map[i] == "DEF"]
+        mid_players = [i for i in players if pos_map[i] == "MID"]
+        fwd_players = [i for i in players if pos_map[i] == "FWD"]
+
+        prob += lpSum(x[i] for i in gk_players)  == 1
+        prob += lpSum(x[i] for i in def_players) == d
+        prob += lpSum(x[i] for i in mid_players) == m
+        prob += lpSum(x[i] for i in fwd_players) == f
+
+        # Solve (suppress solver output)
+        prob.solve(PULP_CBC_CMD(msg=0))
+
+        # Check if a valid solution was found
+        if prob.status != 1:
+            continue
+
+        selected  = [i for i in players if value(x[i]) == 1]
+        team      = df_gw.loc[selected]
+        score     = team["xPts"].sum()
+
+        if score > best_score:
+            best_score     = score
+            best_team      = team
+            best_formation = (d, m, f)
+
+    if best_team is None:
+        print(f"No valid team found within £{budget}m budget")
+        return None
+
+    captain   = best_team.loc[best_team["xPts"].idxmax()]
+    total_pts = best_score + captain["xPts"]
+    spent     = best_team["price"].sum()
+
+    label = f"GW{gameweek}" + (f" {season}" if season else "")
+    print(f"\nBest XI (Budget: £{budget}m) — {label}")
+    print(f"Formation  : {best_formation[0]}-{best_formation[1]}-{best_formation[2]}")
+    print(
+        best_team
+        .sort_values("xPts", ascending=False)
+        [["player", "FPL_pos", "xPts", "price"]]
+        .to_string(index=False)
+    )
+    print(f"\nCaptain    : {captain['player']} ({captain['xPts']:.2f} xPts)")
+    print(f"Total xPts : {total_pts:.2f}  (with captain double)")
+    print(f"Spent      : £{spent:.1f}m / £{budget:.1f}m  (£{budget - spent:.1f}m remaining)")
+
+    return best_team, best_formation, total_pts
+
+
+def get_actual_best_xi_budget(df, gameweek, season=None, budget=83.0):
+    """
+    Select the actual best XI for a specific gameweek based on real total_points
+    scored, within a budget cap. Use this to compare against xPts predictions.
+
+    Parameters
+    ----------
+    df       : DataFrame output from the model (must contain 'price' column)
+    gameweek : int
+    season   : str or None
+    budget   : float — total XI budget in £m (default 83.0)
+    """
+    FORMATIONS = [(3,4,3),(3,5,2),(4,4,2),(4,3,3),(5,3,2),(5,4,1)]
+
+    df_gw = df.copy()
+    if season:
+        df_gw = df_gw[df_gw["season_x"] == season]
+    df_gw = (
+        df_gw[df_gw["gameweek"] == gameweek]
+        .dropna(subset=["total_points", "price"])
+        .reset_index(drop=True)
+    )
+
+    if df_gw.empty:
+        print("No players found for this gameweek/season.")
+        return None
+
+    players  = df_gw.index.tolist()
+    points   = df_gw["total_points"].to_dict()
+    prices   = df_gw["price"].to_dict()
+    pos_map  = df_gw["FPL_pos"].to_dict()
+
+    best_team, best_score, best_formation = None, -np.inf, None
+
+    for (d, m, f) in FORMATIONS:
+        prob = LpProblem(f"ActualBestXI_{d}{m}{f}", LpMaximize)
+
+        x = {i: LpVariable(f"x_{i}", cat="Binary") for i in players}
+
+        # Objective: maximise actual total_points
+        prob += lpSum(points[i] * x[i] for i in players)
+
+        prob += lpSum(prices[i] * x[i] for i in players) <= budget
+        prob += lpSum(x[i] for i in players) == 11
+
+        gk_players  = [i for i in players if pos_map[i] == "GK"]
+        def_players = [i for i in players if pos_map[i] == "DEF"]
+        mid_players = [i for i in players if pos_map[i] == "MID"]
+        fwd_players = [i for i in players if pos_map[i] == "FWD"]
+
+        prob += lpSum(x[i] for i in gk_players)  == 1
+        prob += lpSum(x[i] for i in def_players) == d
+        prob += lpSum(x[i] for i in mid_players) == m
+        prob += lpSum(x[i] for i in fwd_players) == f
+
+        prob.solve(PULP_CBC_CMD(msg=0))
+
+        if prob.status != 1:
+            continue
+
+        selected = [i for i in players if value(x[i]) == 1]
+        team     = df_gw.loc[selected]
+        score    = team["total_points"].sum()
+
+        if score > best_score:
+            best_score     = score
+            best_team      = team
+            best_formation = (d, m, f)
+
+    if best_team is None:
+        print(f"No valid team found within £{budget}m budget")
+        return None
+
+    captain   = best_team.loc[best_team["total_points"].idxmax()]
+    total_pts = best_score + captain["total_points"]
+    spent     = best_team["price"].sum()
+
+    label = f"GW{gameweek}" + (f" {season}" if season else "")
+    print(f"\nActual Best XI (Budget: £{budget}m) — {label}")
+    print(f"Formation  : {best_formation[0]}-{best_formation[1]}-{best_formation[2]}")
+    print(
+        best_team
+        .sort_values("total_points", ascending=False)
+        [["player", "FPL_pos", "total_points", "xPts", "price"]]
+        .to_string(index=False)
+    )
+    print(f"\nCaptain    : {captain['player']} ({captain['total_points']} pts)")
+    print(f"Total pts  : {total_pts:.0f}  (with captain double)")
+    print(f"Spent      : £{spent:.1f}m / £{budget:.1f}m  (£{budget - spent:.1f}m remaining)")
+
+    return best_team, best_formation, total_pts
+
+
+def compare_actual_vs_predicted(df, gameweek, season=None, budget=83.0):
+    """
+    Side-by-side comparison of the actual best XI vs the xPts predicted best XI
+    for a given gameweek, both within the same budget.
+    """
+    print(f"\n{'='*55}")
+    print(f"PREDICTED best XI (based on xPts)")
+    print(f"{'='*55}")
+    pred_result   = get_best_xi_budget(df, gameweek, season, budget)
+
+    print(f"\n{'='*55}")
+    print(f"ACTUAL best XI (based on total_points)")
+    print(f"{'='*55}")
+    actual_result = get_actual_best_xi_budget(df, gameweek, season, budget)
+
+    if pred_result is None or actual_result is None:
+        return
+
+    pred_team,   _, pred_total   = pred_result
+    actual_team, _, actual_total = actual_result
+
+    # How many points did the predicted team actually score?
+    predicted_team_actual_pts = (
+        df[(df["gameweek"] == gameweek) & (df["season_x"] == season)]
+        .set_index("player")["total_points"]
+        .reindex(pred_team["player"].values)
+        .sum()
+    )
+    predicted_team_actual_pts += predicted_team_actual_pts  # captain double
+    captain_actual = pred_team.loc[pred_team["xPts"].idxmax(), "player"]
+    captain_actual_pts = (
+        df[(df["gameweek"] == gameweek) & (df["season_x"] == season)]
+        .set_index("player")["total_points"]
+        .get(captain_actual, 0)
+    )
+    predicted_team_actual_pts = (
+        pred_team.merge(
+            df[(df["gameweek"] == gameweek) & (df["season_x"] == season)]
+            [["player", "total_points"]],
+            on="player", how="left", suffixes=("_pred", "_actual")
+        )["total_points_actual"].sum() + captain_actual_pts
+    )
+
+    print(f"\n{'='*55}")
+    print(f"COMPARISON SUMMARY — GW{gameweek}" + (f" {season}" if season else ""))
+    print(f"{'='*55}")
+    print(f"Predicted XI actual pts scored : {predicted_team_actual_pts:.0f}")
+    print(f"Optimal XI actual pts scored   : {actual_total:.0f}")
+    print(f"Points left on table           : {actual_total - predicted_team_actual_pts:.0f}")
+
+    # Players in optimal but not in predicted
+    missed = set(actual_team["player"]) - set(pred_team["player"])
+    gained = set(pred_team["player"])  - set(actual_team["player"])
+    print(f"\nIn optimal XI but NOT in predicted XI : {', '.join(missed) if missed else 'none'}")
+    print(f"In predicted XI but NOT in optimal XI : {', '.join(gained) if gained else 'none'}")
+
+
+# Example
+compare_actual_vs_predicted(output, gameweek=10, season="2023-24", budget=83.0)
+
+
+# Example — best team you could pick going into GW15 of 2023-24
+get_best_xi_budget(output, gameweek=10, season="2023-24", budget=83.0)
+get_best_xi_budget(output, gameweek=38, season="2024-25", budget=83.0)
+get_best_xi_budget(output, gameweek=15, season="2023-24", budget=83.0)
+get_best_xi(output, gameweek=15, season="2023-24")
+compare_actual_vs_predicted(output, gameweek=15, season="2023-24", budget=83.0)
+
