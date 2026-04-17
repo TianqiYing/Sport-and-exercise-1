@@ -3,12 +3,15 @@ import numpy as np
 from sklearn.ensemble import RandomForestRegressor
 import matplotlib.pyplot as plt
 import scipy.stats as stats
+from openpyxl import Workbook
+from openpyxl.utils.dataframe import dataframe_to_rows
 
 pd.set_option("display.max_columns", None)
 pd.set_option("display.width", None)
 pd.set_option("display.max_colwidth", None)
 
 SEASON = "2024-25"
+PREV_SEASON = "2023-24"
 TARGET_GW = 38
 BUDGET = 830
 FORM_WINDOW = 5
@@ -19,12 +22,17 @@ constraints = {"GK": 1, "DEF": 4, "MID": 4, "FWD": 2}
 MAX_PER_TEAM = 3
 MC_ITER = 10000
 
-GRAPH_START_GW = 10
+GRAPH_START_GW = 1
 GRAPH_END_GW = 38
 
 df = pd.read_csv("active_perfect_understat_enhanced.csv", encoding="latin1", low_memory=False)
-df = df[df["season_x"] == SEASON].copy()
-df = df.sort_values(["player", "gameweek"])
+
+df = df[
+    (df["season_x"] == SEASON) |
+    (df["season_x"] == PREV_SEASON)
+].copy()
+
+df = df.sort_values(["player", "season_x", "gameweek"])
 
 def map_position(pos):
     if pos == "GK":
@@ -50,24 +58,47 @@ df = df[df["minutes_x"] > 0]
 df["points_ewma"] = df.groupby("player")["total_points"].transform(
     lambda x: x.ewm(alpha=EWMA_ALPHA).mean()
 )
+
 df["minutes_ewma"] = df.groupby("player")["minutes_x"].transform(
     lambda x: x.ewm(alpha=EWMA_ALPHA).mean()
 )
+
 df["creativity_ewma"] = df.groupby("player")["creativity"].transform(
     lambda x: x.ewm(alpha=EWMA_ALPHA).mean()
 )
+
 df["threat_ewma"] = df.groupby("player")["threat"].transform(
     lambda x: x.ewm(alpha=EWMA_ALPHA).mean()
 )
 
-df["recent_points"] = df["form_pts_5"]
-df["recent_goals"] = df["form_goals_5"]
-df["recent_assists"] = df["form_assists_5"]
-
-df["std_points"] = df.groupby("player")["total_points"].transform(
-    lambda x: x.rolling(FORM_WINDOW, min_periods=1).std()
+df["recent_points"] = df.groupby("player")["total_points"].transform(
+    lambda x: x.rolling(FORM_WINDOW, min_periods=1).mean()
 )
-df["std_points"] = df["std_points"].fillna(df["std_points"].mean()).replace(0, 0.1)
+
+df["recent_goals"] = df.groupby("player")["goals_scored"].transform(
+    lambda x: x.rolling(FORM_WINDOW, min_periods=1).mean()
+)
+
+df["recent_assists"] = df.groupby("player")["assists_x"].transform(
+    lambda x: x.rolling(FORM_WINDOW, min_periods=1).mean()
+)
+
+df["std_rolling"] = df.groupby("player")["total_points"].transform(
+    lambda x: x.rolling(FORM_WINDOW, min_periods=2).std()
+)
+
+df["std_expanding"] = df.groupby("player")["total_points"].transform(
+    lambda x: x.expanding().std()
+)
+
+USE_EXPANDING_STD = True
+df["std_points"] = df["std_expanding"] if USE_EXPANDING_STD else df["std_rolling"]
+
+df["std_points"] = df.groupby("player")["std_points"].transform(
+    lambda x: x.fillna(x.expanding().mean())
+)
+
+df["std_points"] = df["std_points"].fillna(df["std_points"].median()).replace(0, 0.1)
 
 features = [
     "points_ewma",
@@ -77,12 +108,15 @@ features = [
     "recent_points",
     "recent_goals",
     "recent_assists",
-    "form_xg_5",
-    "form_xa_5",
-    "form_shots_5",
-    "form_key_passes_y_5",
-    "clean_sheet_form"
 ]
+
+train_df = df[
+    (df["season_x"] == PREV_SEASON) |
+    ((df["season_x"] == SEASON) & (df["gameweek"] < TARGET_GW))
+].copy()
+
+model = RandomForestRegressor(n_estimators=200, random_state=42)
+model.fit(train_df[features].fillna(0), train_df["total_points"])
 
 def select_team(data, mode="consistent"):
     df_sim = data.copy()
@@ -119,7 +153,28 @@ def select_team(data, mode="consistent"):
 
     return pd.DataFrame(selected)
 
-def run_full_backtest(start_gw=5, end_gw=38):
+def write_team_sheet(wb, df_team, sheet_name):
+    ws = wb.create_sheet(title=str(sheet_name))
+
+    cols = [
+        "player", "position_mapped", "team", "opponent", "is_home",
+        "price", "sim_mean", "sim_std"
+    ]
+
+    df_out = df_team[cols].copy()
+
+    for r in dataframe_to_rows(df_out, index=False, header=True):
+        ws.append(r)
+
+    ws.append([])
+    ws.append(["Total Price", df_team["price"].sum()])
+    ws.append(["Total Expected Points", df_team["sim_mean"].sum()])
+
+def run_full_backtest(start_gw=1, end_gw=38):
+
+    wb = Workbook()
+    wb.remove(wb.active)
+
     results = []
 
     def score(team):
@@ -128,24 +183,46 @@ def run_full_backtest(start_gw=5, end_gw=38):
         err = pred - act
         return pred, act, err
 
+    base_df = df.copy()
+
     for gw in range(start_gw, end_gw + 1):
 
-        train_df = df[df["gameweek"] < gw]
-        test_df = df[df["gameweek"] == gw]
+        train = base_df[
+            (base_df["season_x"] == PREV_SEASON) |
+            ((base_df["season_x"] == SEASON) & (base_df["gameweek"] < gw))
+        ].copy()
 
-        if len(train_df) == 0 or len(test_df) == 0:
+        test_raw = base_df[
+            (base_df["season_x"] == SEASON) &
+            (base_df["gameweek"] == gw)
+        ].copy()
+
+        test = test_raw.sort_values(["player", "gameweek"]).groupby("player").tail(1).copy()
+
+        if len(train) == 0 or len(test) == 0:
             continue
 
-        model = RandomForestRegressor(n_estimators=200, random_state=42)
-        model.fit(train_df[features].fillna(0), train_df["total_points"])
+        model.fit(train[features].fillna(0), train["total_points"])
 
-        test_df = test_df.copy()
-        test_df["expected_points"] = model.predict(test_df[features].fillna(0))
-        test_df["sim_mean"] = test_df["expected_points"]
-        test_df["sim_std"] = test_df["std_points"]
+        test = test.copy()
+        test["expected_points"] = model.predict(test[features].fillna(0))
+        test["sim_mean"] = test["expected_points"]
+        test["sim_std"] = test["std_points"]
 
-        cons_team = select_team(test_df, "consistent")
-        risk_team = select_team(test_df, "risky")
+        cons_team = select_team(test, "consistent")
+        risk_team = select_team(test, "risky")
+
+        print("\nGW", gw)
+
+        print("\nCONSISTENT TEAM")
+        print(cons_team[[
+            "player", "position_mapped", "team", "price", "sim_mean", "sim_std"
+        ]].to_string(index=False))
+
+        print("\nRISKY TEAM")
+        print(risk_team[[
+            "player", "position_mapped", "team", "price", "sim_mean", "sim_std"
+        ]].to_string(index=False))
 
         cp, ca, ce = score(cons_team)
         rp, ra, re = score(risk_team)
@@ -159,6 +236,11 @@ def run_full_backtest(start_gw=5, end_gw=38):
             "risk_actual": ra,
             "risk_error": re
         })
+
+        write_team_sheet(wb, cons_team, f"GW{gw}_Consistent")
+        write_team_sheet(wb, risk_team, f"GW{gw}_Risky")
+
+    wb.save("FPL_All_Gameweek_Teams.xlsx")
 
     return pd.DataFrame(results)
 
