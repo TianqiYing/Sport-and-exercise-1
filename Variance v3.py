@@ -10,21 +10,27 @@ pd.set_option("display.width", None)
 pd.set_option("display.max_colwidth", None)
 
 SEASON = "2024-25"
-TARGET_GW = 37
+PREV_SEASON = "2023-24"
+TARGET_GW = 38
 BUDGET = 830
 FORM_WINDOW = 5
-EWMA_ALPHA = 0.6
+EWMA_ALPHA = 0.35
 
 constraints = {"GK":1, "DEF":4, "MID":4, "FWD":2}
 MAX_PER_TEAM = 3
 MC_ITER = 10000
 
 # -------------------------
-# LOAD DATA
+# LOAD DATA (WITH PREVIOUS SEASON)
 # -------------------------
 df = pd.read_csv("active_perfect_understat_enhanced.csv", encoding="latin1", low_memory=False)
-df = df[df["season_x"] == SEASON].copy()
-df = df.sort_values(["player", "gameweek"])
+
+df = df[
+    (df["season_x"] == SEASON) |
+    (df["season_x"] == PREV_SEASON)
+].copy()
+
+df = df.sort_values(["player", "season_x", "gameweek"])
 
 # -------------------------
 # POSITION MAPPING + SUB FIX
@@ -45,26 +51,56 @@ def map_position(pos):
 
 df["position_mapped"] = df["position"].apply(map_position)
 
-# fill subs using player's most common real position
 df["position_mapped"] = df.groupby("player")["position_mapped"]\
     .transform(lambda x: x.fillna(x.mode().iloc[0] if not x.mode().empty else "MID"))
 
 # -------------------------
 # FEATURE ENGINEERING
 # -------------------------
-df["goals_ewma"] = df.groupby("player")["goals_scored"].transform(lambda x: x.ewm(alpha=EWMA_ALPHA).mean())
-df["assists_ewma"] = df.groupby("player")["assists_x"].transform(lambda x: x.ewm(alpha=EWMA_ALPHA).mean())
-df["points_ewma"] = df.groupby("player")["total_points"].transform(lambda x: x.ewm(alpha=EWMA_ALPHA).mean())
-df["minutes_ewma"] = df.groupby("player")["minutes_x"].transform(lambda x: x.ewm(alpha=EWMA_ALPHA).mean())
-df["creativity_ewma"] = df.groupby("player")["creativity"].transform(lambda x: x.ewm(alpha=EWMA_ALPHA).mean())
-df["threat_ewma"] = df.groupby("player")["threat"].transform(lambda x: x.ewm(alpha=EWMA_ALPHA).mean())
+
+# EWMA (keep season separation to avoid leakage)
+df["points_ewma"] = df.groupby(["player","season_x"])["total_points"].transform(lambda x: x.ewm(alpha=EWMA_ALPHA).mean())
+df["minutes_ewma"] = df.groupby(["player","season_x"])["minutes_x"].transform(lambda x: x.ewm(alpha=EWMA_ALPHA).mean())
+df["creativity_ewma"] = df.groupby(["player","season_x"])["creativity"].transform(lambda x: x.ewm(alpha=EWMA_ALPHA).mean())
+df["threat_ewma"] = df.groupby(["player","season_x"])["threat"].transform(lambda x: x.ewm(alpha=EWMA_ALPHA).mean())
 
 df["recent_points"] = df["form_pts_5"]
 df["recent_goals"] = df["form_goals_5"]
 df["recent_assists"] = df["form_assists_5"]
 
-df["std_points"] = df.groupby("player")["total_points"].transform(lambda x: x.rolling(FORM_WINDOW, min_periods=1).std())
-df["std_points"] = df["std_points"].fillna(df["std_points"].mean()).replace(0, 0.1)
+# -------------------------
+# STD FIX 1: ROLLING ACROSS SEASONS
+# -------------------------
+df["std_rolling"] = df.groupby("player")["total_points"].transform(
+    lambda x: x.rolling(FORM_WINDOW, min_periods=2).std()
+)
+
+# -------------------------
+# STD FIX 2: EXPANDING STD
+# -------------------------
+df["std_expanding"] = df.groupby("player")["total_points"].transform(
+    lambda x: x.expanding().std()
+)
+
+# -------------------------
+# CHOOSE WHICH STD TO USE
+# -------------------------
+USE_EXPANDING_STD = True
+
+if USE_EXPANDING_STD:
+    df["std_points"] = df["std_expanding"]
+else:
+    df["std_points"] = df["std_rolling"]
+
+# -------------------------
+# CLEAN STD VALUES (PLAYER-SPECIFIC)
+# -------------------------
+df["std_points"] = df.groupby("player")["std_points"].transform(
+    lambda x: x.fillna(x.expanding().mean())
+)
+
+df["std_points"] = df["std_points"].fillna(df["std_points"].median())
+df["std_points"] = df["std_points"].replace(0, 0.1)
 
 features = [
     "points_ewma",
@@ -82,9 +118,12 @@ features = [
 ]
 
 # -------------------------
-# TRAIN MODEL
+# TRAIN MODEL (PREV SEASON + CURRENT)
 # -------------------------
-train_df = df[df["gameweek"] < TARGET_GW].copy()
+train_df = df[
+    (df["season_x"] == PREV_SEASON) |
+    ((df["season_x"] == SEASON) & (df["gameweek"] < TARGET_GW))
+].copy()
 
 X = train_df[features].fillna(0)
 y = train_df["total_points"]
@@ -95,7 +134,11 @@ model.fit(X, y)
 # -------------------------
 # PREDICT TARGET GW
 # -------------------------
-gw_df = df[df["gameweek"] == TARGET_GW].copy()
+gw_df = df[
+    (df["season_x"] == SEASON) &
+    (df["gameweek"] == TARGET_GW)
+].copy()
+
 gw_df["expected_points"] = model.predict(gw_df[features].fillna(0))
 
 gw_df["sim_mean"] = gw_df["expected_points"]
@@ -110,7 +153,7 @@ def select_team(data, mode="consistent"):
     if mode == "consistent":
         df_sim["score"] = df_sim["sim_mean"] / (1 + df_sim["sim_std"])
     else:
-        df_sim["score"] = df_sim["sim_mean"] * (1 + df_sim["sim_std"])
+        df_sim["score"] = df_sim["sim_mean"] * (10 + df_sim["sim_std"])
 
     df_sim["value_metric"] = df_sim["score"] / df_sim["price"]
 
