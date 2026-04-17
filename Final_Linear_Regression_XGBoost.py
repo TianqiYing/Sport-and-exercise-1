@@ -19,6 +19,9 @@ MIN_TRAIN_SEASONS = 2
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
+RUN_TRAINING = False
+RUN_BEST_XI_ANALYSIS = True
+
 # =========================================================
 # 2. METRIC FUNCTIONS
 # =========================================================
@@ -475,30 +478,28 @@ def run_position_specific_xgboost(df):
 
 
 # =========================================================
-# 11. RUN ALL MODELS
+# 11. RUN TRAINING AND MODEL EVALUATION
 # =========================================================
-lr_output, lr_season_summary, lr_overall = run_global_model(df, "Linear Regression")
-xgb_output, xgb_season_summary, xgb_overall = run_global_model(df, "Single XGBoost")
-pos_output, pos_season_summary, pos_overall = run_position_specific_xgboost(df)
+if RUN_TRAINING:
+    lr_output, lr_season_summary, lr_overall = run_global_model(df, "Linear Regression")
+    xgb_output, xgb_season_summary, xgb_overall = run_global_model(df, "Single XGBoost")
+    pos_output, pos_season_summary, pos_overall = run_position_specific_xgboost(df)
 
-# =========================================================
-# 12. FINAL COMPARISON
-# =========================================================
-final_comparison = pd.DataFrame([
-    lr_overall,
-    xgb_overall,
-    pos_overall
-]).round(3)
+    final_comparison = pd.DataFrame([
+        lr_overall,
+        xgb_overall,
+        pos_overall
+    ]).round(3)
 
-print(f"\n==============================")
-print("FINAL MODEL COMPARISON")
-print("==============================")
-print(final_comparison.to_string(index=False))
+    print(f"\n==============================")
+    print("FINAL MODEL COMPARISON")
+    print("==============================")
+    print(final_comparison.to_string(index=False))
 
-final_comparison.to_csv(
-    os.path.join(OUTPUT_DIR, "final_model_comparison.csv"),
-    index=False
-)
+    final_comparison.to_csv(
+        os.path.join(OUTPUT_DIR, "final_model_comparison.csv"),
+        index=False
+    )
 
 # =========================================================
 # BEST XI SELECTOR
@@ -614,9 +615,9 @@ def get_best_xi(pred_df, source_df, season, gameweek, budget=None):
     else:
         # smaller candidate pools for budget-constrained search
         gks = gw[gw["FPL_pos"] == "GK"].sort_values("xPts", ascending=False).head(2)
-        defs = gw[gw["FPL_pos"] == "DEF"].sort_values("xPts", ascending=False).head(8)
-        mids = gw[gw["FPL_pos"] == "MID"].sort_values("xPts", ascending=False).head(8)
-        fwds = gw[gw["FPL_pos"] == "FWD"].sort_values("xPts", ascending=False).head(6)
+        defs = gw[gw["FPL_pos"] == "DEF"].sort_values("xPts", ascending=False).head(6)
+        mids = gw[gw["FPL_pos"] == "MID"].sort_values("xPts", ascending=False).head(6)
+        fwds = gw[gw["FPL_pos"] == "FWD"].sort_values("xPts", ascending=False).head(4)
 
         if len(gks) == 0:
             print("No goalkeeper available.")
@@ -663,7 +664,8 @@ def get_best_xi(pred_df, source_df, season, gameweek, budget=None):
 
     budget_used = best_team["price"].sum()
 
-    print(f"\nBest XI — {season} GW{gameweek}")
+    gw_label = int(gameweek) if pd.notna(gameweek) else gameweek
+    print(f"\nBest XI — {season} GW{gw_label}")
     print(f"Formation : {best_formation[0]}-{best_formation[1]}-{best_formation[2]}")
 
     if budget is None:
@@ -757,10 +759,28 @@ def evaluate_model_over_season(model_key, season, budget=None, save_csv=True):
     print(f"\n===== {model_key} — {season} season summary =====")
     print(result_df.to_string(index=False))
 
+    gw_mae = mean_absolute_error(
+        result_df["actual_team_score"],
+        result_df["predicted_team_xPts"]
+    )
+    gw_rmse = mean_squared_error(
+        result_df["actual_team_score"],
+        result_df["predicted_team_xPts"]
+    ) ** 0.5
+    gw_corr = safe_corr(
+        result_df["actual_team_score"],
+        result_df["predicted_team_xPts"]
+    )
+
     print("\nAverages:")
     print("Average predicted team xPts :", round(result_df["predicted_team_xPts"].mean(), 3))
     print("Average actual team score   :", round(result_df["actual_team_score"].mean(), 3))
     print("Total actual team score     :", round(result_df["actual_team_score"].sum(), 3))
+
+    print("\nGW-level accuracy:")
+    print("GW MAE                      :", round(gw_mae, 3))
+    print("GW RMSE                     :", round(gw_rmse, 3))
+    print("GW Corr                     :", round(gw_corr, 3))
 
     if save_csv:
         budget_tag = "unlimited" if budget is None else str(budget).replace(".", "_")
@@ -773,6 +793,201 @@ def evaluate_model_over_season(model_key, season, budget=None, save_csv=True):
 
     return result_df
 
+# =========================================================
+# OPTIMAL XI AND SEASON COMPARISON
+# =========================================================
+def get_optimal_xi(source_df, season, gameweek, budget=None):
+    source_df = source_df.copy()
+    source_df["date"] = pd.to_datetime(source_df["date"], errors="coerce")
+
+    gw = source_df[
+        (source_df["season_x"] == season) &
+        (source_df["gameweek"] == gameweek)
+    ].copy()
+
+    if len(gw) == 0:
+        return None
+
+    gw = gw.dropna(subset=["FPL_pos", "price", "total_points"]).copy()
+
+    gks = gw[gw["FPL_pos"] == "GK"].sort_values("total_points", ascending=False).head(2)
+    defs = gw[gw["FPL_pos"] == "DEF"].sort_values("total_points", ascending=False).head(6)
+    mids = gw[gw["FPL_pos"] == "MID"].sort_values("total_points", ascending=False).head(6)
+    fwds = gw[gw["FPL_pos"] == "FWD"].sort_values("total_points", ascending=False).head(4)
+
+    if len(gks) == 0:
+        return None
+
+    best_team = None
+    best_score = -np.inf
+    best_formation = None
+
+    for d, m, f in FORMATIONS:
+        for gk_idx in itertools.combinations(gks.index, 1):
+            for def_idx in itertools.combinations(defs.index, d):
+                for mid_idx in itertools.combinations(mids.index, m):
+                    for fwd_idx in itertools.combinations(fwds.index, f):
+                        idx = list(gk_idx) + list(def_idx) + list(mid_idx) + list(fwd_idx)
+                        team = gw.loc[idx].copy()
+
+                        total_price = team["price"].sum()
+                        if budget is not None and total_price > budget:
+                            continue
+
+                        score = team["total_points"].sum()
+
+                        if score > best_score:
+                            best_score = score
+                            best_team = team.copy()
+                            best_formation = (d, m, f)
+
+    if best_team is None:
+        return None
+
+    captain = best_team.loc[best_team["total_points"].idxmax()]
+    total_with_captain = best_team["total_points"].sum() + captain["total_points"]
+
+    return best_team, best_formation, total_with_captain, captain["player"]
+
+
+def plot_gw_comparison(result_df, season, budget=None, save_dir=OUTPUT_DIR):
+    import matplotlib.pyplot as plt
+
+    if result_df is None or len(result_df) == 0:
+        return None
+
+    budget_tag = "unlimited" if budget is None else str(budget).replace(".", "_")
+    save_path = os.path.join(save_dir, f"comparison_{season}_budget_{budget_tag}.png")
+
+    plt.figure(figsize=(10, 5))
+    plt.plot(result_df["gameweek"], result_df["predicted_team_score"], marker="o", label="Predicted XI pts")
+    plt.plot(result_df["gameweek"], result_df["optimal_team_score"], marker="o", label="Optimal XI pts")
+    plt.xlabel("Gameweek")
+    plt.ylabel("Points")
+    plt.title(f"Predicted XI vs Optimal XI — {season}")
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig(save_path, dpi=200)
+    plt.close()
+
+    return save_path
+
+
+def compare_season_performance(model_key, season, start_gw=1, end_gw=38, budget=None, save_csv=True, save_plot=True):
+    pred_df = load_prediction_file(model_key)
+
+    season_gws = sorted(
+        pred_df.loc[
+            (pred_df["season_x"] == season) &
+            (pred_df["gameweek"] >= start_gw) &
+            (pred_df["gameweek"] <= end_gw),
+            "gameweek"
+        ].dropna().unique()
+    )
+
+    if len(season_gws) == 0:
+        print(f"No gameweeks found for season {season} in model {model_key}.")
+        return None
+
+    rows = []
+
+    for gw in season_gws:
+        pred_out = get_best_xi(
+            pred_df=pred_df,
+            source_df=df,
+            season=season,
+            gameweek=gw,
+            budget=budget
+        )
+
+        opt_out = get_optimal_xi(
+            source_df=df,
+            season=season,
+            gameweek=gw,
+            budget=budget
+        )
+
+        if pred_out is None or opt_out is None:
+            continue
+
+        pred_team, pred_formation, pred_score, pred_actual_score = pred_out
+        opt_team, opt_formation, opt_score, opt_captain = opt_out
+
+        pred_captain = pred_team.loc[pred_team["xPts"].idxmax(), "player"]
+        budget_used = pred_team["price"].sum()
+        gap = opt_score - pred_actual_score
+
+        rows.append({
+            "model": model_key,
+            "season": season,
+            "gameweek": int(gw),
+            "predicted_formation": f"{pred_formation[0]}-{pred_formation[1]}-{pred_formation[2]}",
+            "optimal_formation": f"{opt_formation[0]}-{opt_formation[1]}-{opt_formation[2]}",
+            "budget_used": round(budget_used, 3),
+            "predicted_team_xPts": round(pred_score, 3),
+            "predicted_team_score": round(pred_actual_score, 3),
+            "optimal_team_score": round(opt_score, 3),
+            "pts_left_on_table": round(gap, 3),
+            "predicted_captain": pred_captain,
+            "optimal_captain": opt_captain,
+            "captain_correct": int(pred_captain == opt_captain)
+        })
+
+    if len(rows) == 0:
+        print(f"No valid rows generated for {model_key} in {season}.")
+        return None
+
+    result_df = pd.DataFrame(rows).sort_values("gameweek").reset_index(drop=True)
+
+    total_predicted = result_df["predicted_team_score"].sum()
+    total_optimal = result_df["optimal_team_score"].sum()
+    total_left = result_df["pts_left_on_table"].sum()
+    avg_gap = result_df["pts_left_on_table"].mean()
+
+    best_idx = result_df["predicted_team_score"].idxmax()
+    worst_idx = result_df["pts_left_on_table"].idxmax()
+
+    best_gw = int(result_df.loc[best_idx, "gameweek"])
+    best_gw_pts = result_df.loc[best_idx, "predicted_team_score"]
+
+    worst_gw = int(result_df.loc[worst_idx, "gameweek"])
+    worst_gap = result_df.loc[worst_idx, "pts_left_on_table"]
+
+    captain_correct = int(result_df["captain_correct"].sum())
+    total_weeks = len(result_df)
+    efficiency = 100 * total_predicted / total_optimal if total_optimal != 0 else np.nan
+
+    budget_tag = "unlimited" if budget is None else str(budget).replace(".", "_")
+    csv_path = os.path.join(
+        OUTPUT_DIR,
+        f"comparison_{model_key}_{season}_GW{start_gw}_GW{end_gw}_budget_{budget_tag}.csv"
+    )
+
+    if save_csv:
+        result_df.to_csv(csv_path, index=False)
+
+    plot_path = None
+    if save_plot:
+        plot_path = plot_gw_comparison(result_df, season=f"{season}_GW{start_gw}_GW{end_gw}", budget=budget)
+
+    print(f"\nSUMMARY — {season}  GW{start_gw}-GW{end_gw}")
+    print("=" * 62)
+    print(f"Total predicted XI pts   : {total_predicted:.1f}")
+    print(f"Total optimal XI pts     : {total_optimal:.1f}")
+    print(f"Total pts left on table  : {total_left:.1f}")
+    print(f"Average gap per GW       : {avg_gap:.1f}")
+    print(f"Best GW (predicted)      : GW{best_gw} ({best_gw_pts:.1f} pts)")
+    print(f"Worst GW (biggest gap)   : GW{worst_gw} ({worst_gap:.1f} pts left on table)")
+    print(f"Captain correct          : {captain_correct} / {total_weeks} gameweeks")
+    print(f"Efficiency               : {efficiency:.1f}% (predicted / optimal)")
+
+    if plot_path is not None:
+        print(f"Saved plot               -> {plot_path}")
+    if save_csv:
+        print(f"Saved CSV                -> {csv_path}")
+
+    return result_df
+
 
 def compare_models_over_season(season, budget=None):
     all_results = []
@@ -782,6 +997,19 @@ def compare_models_over_season(season, budget=None):
         if result_df is None:
             continue
 
+        gw_mae = mean_absolute_error(
+            result_df["actual_team_score"],
+            result_df["predicted_team_xPts"]
+        )
+        gw_rmse = mean_squared_error(
+            result_df["actual_team_score"],
+            result_df["predicted_team_xPts"]
+        ) ** 0.5
+        gw_corr = safe_corr(
+            result_df["actual_team_score"],
+            result_df["predicted_team_xPts"]
+        )
+
         all_results.append({
             "model": model_key,
             "season": season,
@@ -789,7 +1017,10 @@ def compare_models_over_season(season, budget=None):
             "weeks_evaluated": len(result_df),
             "avg_predicted_team_xPts": round(result_df["predicted_team_xPts"].mean(), 3),
             "avg_actual_team_score": round(result_df["actual_team_score"].mean(), 3),
-            "total_actual_team_score": round(result_df["actual_team_score"].sum(), 3)
+            "total_actual_team_score": round(result_df["actual_team_score"].sum(), 3),
+            "gw_mae": round(gw_mae, 3),
+            "gw_rmse": round(gw_rmse, 3),
+            "gw_corr": round(gw_corr, 3)
         })
 
     if len(all_results) == 0:
@@ -816,7 +1047,36 @@ def compare_models_over_season(season, budget=None):
     return comparison_df
 
 
-# Example:
-#run_best_xi_selector()
-#evaluate_model_over_season("linear", season="2024-25", budget=83)
-#compare_models_over_season(season="2024-25", budget=83)
+# =========================================================
+# EXAMPLES
+# =========================================================
+
+# 1. Run model training and save prediction files
+# RUN_TRAINING = True
+# RUN_BEST_XI_ANALYSIS = False
+
+# 2. Interactive single-week Best XI selector
+# run_best_xi_selector()
+
+# 3. Single model, whole-season weekly Best XI summary
+# evaluate_model_over_season("linear", season="2024-25", budget=83)
+# evaluate_model_over_season("xgboost", season="2024-25", budget=83)
+# evaluate_model_over_season("position_xgboost", season="2024-25", budget=83)
+
+# 4. Compare the three models across one season
+# compare_models_over_season(season="2024-25", budget=83)
+# compare_models_over_season(season="2024-25", budget=None)
+
+# 5. Detailed predicted-vs-optimal comparison for one model
+# compare_season_performance("linear", season="2024-25", start_gw=1, end_gw=38, budget=83)
+# compare_season_performance("xgboost", season="2024-25", start_gw=1, end_gw=38, budget=83)
+# compare_season_performance("position_xgboost", season="2024-25", start_gw=1, end_gw=38, budget=83)
+
+# 6. Unlimited-budget version
+# compare_season_performance("linear", season="2024-25", start_gw=1, end_gw=38, budget=None)
+
+# 7. Shorter range example
+# compare_season_performance("linear", season="2024-25", start_gw=1, end_gw=10, budget=83)
+
+if RUN_BEST_XI_ANALYSIS:
+    compare_models_over_season(season="2024-25", budget=83)
