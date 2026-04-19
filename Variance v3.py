@@ -55,52 +55,58 @@ df["position_mapped"] = df.groupby("player")["position_mapped"]\
     .transform(lambda x: x.fillna(x.mode().iloc[0] if not x.mode().empty else "MID"))
 
 # -------------------------
-# FEATURE ENGINEERING
+# FEATURE ENGINEERING (NO DATA LEAKAGE)
 # -------------------------
 
-# EWMA (keep season separation to avoid leakage)
-df["points_ewma"] = df.groupby(["player","season_x"])["total_points"].transform(lambda x: x.ewm(alpha=EWMA_ALPHA).mean())
-df["minutes_ewma"] = df.groupby(["player","season_x"])["minutes_x"].transform(lambda x: x.ewm(alpha=EWMA_ALPHA).mean())
-df["creativity_ewma"] = df.groupby(["player","season_x"])["creativity"].transform(lambda x: x.ewm(alpha=EWMA_ALPHA).mean())
-df["threat_ewma"] = df.groupby(["player","season_x"])["threat"].transform(lambda x: x.ewm(alpha=EWMA_ALPHA).mean())
+df["points_ewma"] = df.groupby("player")["total_points"].transform(
+    lambda x: x.shift(1).ewm(alpha=EWMA_ALPHA).mean()
+)
 
-df["recent_points"] = df["form_pts_5"]
-df["recent_goals"] = df["form_goals_5"]
-df["recent_assists"] = df["form_assists_5"]
+df["minutes_ewma"] = df.groupby("player")["minutes_x"].transform(
+    lambda x: x.shift(1).ewm(alpha=EWMA_ALPHA).mean()
+)
+
+df["creativity_ewma"] = df.groupby("player")["creativity"].transform(
+    lambda x: x.shift(1).ewm(alpha=EWMA_ALPHA).mean()
+)
+
+df["threat_ewma"] = df.groupby("player")["threat"].transform(
+    lambda x: x.shift(1).ewm(alpha=EWMA_ALPHA).mean()
+)
+
+df["recent_points"] = df.groupby("player")["total_points"].transform(
+    lambda x: x.shift(1).rolling(FORM_WINDOW, min_periods=1).mean()
+)
+
+df["recent_goals"] = df.groupby("player")["goals_scored"].transform(
+    lambda x: x.shift(1).rolling(FORM_WINDOW, min_periods=1).mean()
+)
+
+df["recent_assists"] = df.groupby("player")["assists_x"].transform(
+    lambda x: x.shift(1).rolling(FORM_WINDOW, min_periods=1).mean()
+)
 
 # -------------------------
-# STD FIX 1: ROLLING ACROSS SEASONS
+# STD (ALSO SHIFTED)
 # -------------------------
+
 df["std_rolling"] = df.groupby("player")["total_points"].transform(
-    lambda x: x.rolling(FORM_WINDOW, min_periods=2).std()
+    lambda x: x.shift(1).rolling(FORM_WINDOW, min_periods=2).std()
 )
 
-# -------------------------
-# STD FIX 2: EXPANDING STD
-# -------------------------
 df["std_expanding"] = df.groupby("player")["total_points"].transform(
-    lambda x: x.expanding().std()
+    lambda x: x.shift(1).expanding().std()
 )
 
-# -------------------------
-# CHOOSE WHICH STD TO USE
-# -------------------------
 USE_EXPANDING_STD = True
+df["std_points"] = df["std_expanding"] if USE_EXPANDING_STD else df["std_rolling"]
 
-if USE_EXPANDING_STD:
-    df["std_points"] = df["std_expanding"]
-else:
-    df["std_points"] = df["std_rolling"]
-
-# -------------------------
-# CLEAN STD VALUES (PLAYER-SPECIFIC)
-# -------------------------
 df["std_points"] = df.groupby("player")["std_points"].transform(
     lambda x: x.fillna(x.expanding().mean())
 )
 
-df["std_points"] = df["std_points"].fillna(df["std_points"].median())
-df["std_points"] = df["std_points"].replace(0, 0.1)
+df["std_points"] = df["std_points"].fillna(df["std_points"].median()).replace(0, 0.1)
+
 
 features = [
     "points_ewma",

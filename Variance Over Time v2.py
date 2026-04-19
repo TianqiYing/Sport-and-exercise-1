@@ -47,6 +47,8 @@ def map_position(pos):
         return np.nan
     return np.nan
 
+
+
 df["position_mapped"] = df["position"].apply(map_position)
 
 df["position_mapped"] = df.groupby("player")["position_mapped"].transform(
@@ -55,40 +57,48 @@ df["position_mapped"] = df.groupby("player")["position_mapped"].transform(
 
 df = df[df["minutes_x"] > 0]
 
+# -------------------------
+# FEATURE ENGINEERING (NO DATA LEAKAGE)
+# -------------------------
+
 df["points_ewma"] = df.groupby("player")["total_points"].transform(
-    lambda x: x.ewm(alpha=EWMA_ALPHA).mean()
+    lambda x: x.shift(1).ewm(alpha=EWMA_ALPHA).mean()
 )
 
 df["minutes_ewma"] = df.groupby("player")["minutes_x"].transform(
-    lambda x: x.ewm(alpha=EWMA_ALPHA).mean()
+    lambda x: x.shift(1).ewm(alpha=EWMA_ALPHA).mean()
 )
 
 df["creativity_ewma"] = df.groupby("player")["creativity"].transform(
-    lambda x: x.ewm(alpha=EWMA_ALPHA).mean()
+    lambda x: x.shift(1).ewm(alpha=EWMA_ALPHA).mean()
 )
 
 df["threat_ewma"] = df.groupby("player")["threat"].transform(
-    lambda x: x.ewm(alpha=EWMA_ALPHA).mean()
+    lambda x: x.shift(1).ewm(alpha=EWMA_ALPHA).mean()
 )
 
 df["recent_points"] = df.groupby("player")["total_points"].transform(
-    lambda x: x.rolling(FORM_WINDOW, min_periods=1).mean()
+    lambda x: x.shift(1).rolling(FORM_WINDOW, min_periods=1).mean()
 )
 
 df["recent_goals"] = df.groupby("player")["goals_scored"].transform(
-    lambda x: x.rolling(FORM_WINDOW, min_periods=1).mean()
+    lambda x: x.shift(1).rolling(FORM_WINDOW, min_periods=1).mean()
 )
 
 df["recent_assists"] = df.groupby("player")["assists_x"].transform(
-    lambda x: x.rolling(FORM_WINDOW, min_periods=1).mean()
+    lambda x: x.shift(1).rolling(FORM_WINDOW, min_periods=1).mean()
 )
 
+# -------------------------
+# STD (ALSO SHIFTED)
+# -------------------------
+
 df["std_rolling"] = df.groupby("player")["total_points"].transform(
-    lambda x: x.rolling(FORM_WINDOW, min_periods=2).std()
+    lambda x: x.shift(1).rolling(FORM_WINDOW, min_periods=2).std()
 )
 
 df["std_expanding"] = df.groupby("player")["total_points"].transform(
-    lambda x: x.expanding().std()
+    lambda x: x.shift(1).expanding().std()
 )
 
 USE_EXPANDING_STD = True
@@ -158,7 +168,7 @@ def write_team_sheet(wb, df_team, sheet_name):
 
     cols = [
         "player", "position_mapped", "team", "opponent", "is_home",
-        "price", "sim_mean", "sim_std"
+        "price", "sim_mean", "sim_std", "total_points"
     ]
 
     df_out = df_team[cols].copy()
@@ -169,6 +179,7 @@ def write_team_sheet(wb, df_team, sheet_name):
     ws.append([])
     ws.append(["Total Price", df_team["price"].sum()])
     ws.append(["Total Expected Points", df_team["sim_mean"].sum()])
+    ws.append(["Total Actual Points", df_team["total_points"].fillna(0).sum()])
 
 def run_full_backtest(start_gw=1, end_gw=38):
 
@@ -216,12 +227,12 @@ def run_full_backtest(start_gw=1, end_gw=38):
 
         print("\nCONSISTENT TEAM")
         print(cons_team[[
-            "player", "position_mapped", "team", "price", "sim_mean", "sim_std"
+            "player", "position_mapped", "team", "price", "sim_mean", "sim_std", "total_points"
         ]].to_string(index=False))
 
         print("\nRISKY TEAM")
         print(risk_team[[
-            "player", "position_mapped", "team", "price", "sim_mean", "sim_std"
+            "player", "position_mapped", "team", "price", "sim_mean", "sim_std", "total_points"
         ]].to_string(index=False))
 
         cp, ca, ce = score(cons_team)
