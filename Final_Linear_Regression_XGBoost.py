@@ -1046,6 +1046,209 @@ def compare_models_over_season(season, budget=None):
 
     return comparison_df
 
+# =========================================================
+# Plot
+# =========================================================
+
+def plot_points_left_boxplot(season="2024-25", budget=83, save_dir=OUTPUT_DIR):
+    import matplotlib.pyplot as plt
+
+    lr_cmp = compare_season_performance(
+        "linear", season=season, start_gw=1, end_gw=38,
+        budget=budget, save_csv=False, save_plot=False
+    )
+    xgb_cmp = compare_season_performance(
+        "xgboost", season=season, start_gw=1, end_gw=38,
+        budget=budget, save_csv=False, save_plot=False
+    )
+
+    if lr_cmp is None or xgb_cmp is None:
+        print("Missing comparison results.")
+        return None
+
+    data = [
+        lr_cmp["pts_left_on_table"].dropna(),
+        xgb_cmp["pts_left_on_table"].dropna()
+    ]
+
+    plt.figure(figsize=(6.5, 5.5))
+    plt.boxplot(data, labels=["Linear Regression", "XGBoost"], showmeans=True)
+
+    plt.ylabel("Points left on the table")
+    plt.title(f"Weekly Gap to Optimal XI — {season}")
+    plt.tight_layout()
+
+    budget_tag = "unlimited" if budget is None else str(budget).replace(".", "_")
+    save_path = os.path.join(save_dir, f"points_left_boxplot_{season}_budget_{budget_tag}.png")
+    plt.savefig(save_path, dpi=220)
+    plt.close()
+
+    print(f"Saved boxplot to: {save_path}")
+    return save_path
+
+# =========================================================
+# Comparision between XGBoost and Linear Regression
+# =========================================================
+
+def plot_team_error_boxplot_from_gw_summary(season="2024-25", budget=83, save_dir=OUTPUT_DIR):
+    import os
+    import numpy as np
+    import pandas as pd
+    import matplotlib.pyplot as plt
+    from matplotlib.lines import Line2D
+
+    budget_tag = "unlimited" if budget is None else str(budget).replace(".", "_")
+
+    lr_path = os.path.join(save_dir, f"linear_{season}_budget_{budget_tag}_gw_summary.csv")
+    xgb_path = os.path.join(save_dir, f"xgboost_{season}_budget_{budget_tag}_gw_summary.csv")
+
+    if not os.path.exists(lr_path):
+        raise FileNotFoundError(f"Missing file: {lr_path}")
+    if not os.path.exists(xgb_path):
+        raise FileNotFoundError(f"Missing file: {xgb_path}")
+
+    lr_df = pd.read_csv(lr_path)
+    xgb_df = pd.read_csv(xgb_path)
+
+    lr_err = (lr_df["actual_team_score"] - lr_df["predicted_team_xPts"]).abs().values
+    xgb_err = (xgb_df["actual_team_score"] - xgb_df["predicted_team_xPts"]).abs().values
+
+    data = [lr_err, xgb_err]
+    labels = ["Linear Regression", "XGBoost"]
+
+    fig, ax = plt.subplots(figsize=(9, 6.5))
+
+    bp = ax.boxplot(
+        data,
+        labels=labels,
+        patch_artist=True,
+        widths=0.5,
+        showmeans=True,
+        meanprops=dict(marker="^", markersize=9),
+        medianprops=dict(linewidth=2),
+        whiskerprops=dict(linewidth=1.5),
+        capprops=dict(linewidth=1.5),
+        flierprops=dict(marker="o", markersize=6, markerfacecolor="white", markeredgewidth=1.5)
+    )
+
+    for box in bp["boxes"]:
+        box.set_facecolor("#D9D9D9")
+        box.set_linewidth(1.5)
+
+    rng = np.random.default_rng(42)
+    for i, values in enumerate(data, start=1):
+        x_jitter = rng.normal(loc=i, scale=0.04, size=len(values))
+        ax.scatter(x_jitter, values, alpha=0.45, s=28)
+
+    for i, values in enumerate(data, start=1):
+        mean_v = np.mean(values)
+        median_v = np.median(values)
+        ax.text(i + 0.18, mean_v, f"mean = {mean_v:.1f}", va="center", fontsize=10)
+        ax.text(i + 0.18, median_v, f"median = {median_v:.1f}", va="center", fontsize=10)
+
+    ax.set_title(f"Weekly Team Prediction Error — {season}", fontsize=18, pad=14)
+    ax.set_ylabel("|Actual team score - Predicted team xPts|", fontsize=13)
+    ax.text(
+        0.5, 1.01,
+        "Lower is better: smaller weekly prediction error",
+        transform=ax.transAxes,
+        ha="center",
+        fontsize=11
+    )
+
+    legend_handles = [
+        Line2D([0], [0], color="black", linewidth=2, label="Median"),
+        Line2D([0], [0], marker="^", linestyle="None", markersize=9, color="black", label="Mean"),
+        Line2D([0], [0], marker="o", linestyle="None", markersize=6, markerfacecolor="white",
+               markeredgecolor="black", label="Outlier"),
+        Line2D([0], [0], marker="o", linestyle="None", markersize=6, color="black", alpha=0.45,
+               label="One gameweek"),
+    ]
+    ax.legend(handles=legend_handles, loc="upper right", frameon=True)
+
+    ax.grid(axis="y", linestyle="--", alpha=0.35)
+    plt.tight_layout()
+
+    save_path = os.path.join(save_dir, f"team_error_boxplot_{season}_budget_{budget_tag}.png")
+    plt.savefig(save_path, dpi=240, bbox_inches="tight")
+    plt.close()
+
+    print(f"Saved improved boxplot to: {save_path}")
+    return save_path
+
+def plot_error_ecdf_from_gw_summary(season="2024-25", budget=83, save_dir=OUTPUT_DIR):
+    import os
+    import numpy as np
+    import pandas as pd
+    import matplotlib.pyplot as plt
+
+    budget_tag = "unlimited" if budget is None else str(budget).replace(".", "_")
+
+    lr_path = os.path.join(save_dir, f"linear_{season}_budget_{budget_tag}_gw_summary.csv")
+    xgb_path = os.path.join(save_dir, f"xgboost_{season}_budget_{budget_tag}_gw_summary.csv")
+
+    if not os.path.exists(lr_path):
+        raise FileNotFoundError(f"Missing file: {lr_path}")
+    if not os.path.exists(xgb_path):
+        raise FileNotFoundError(f"Missing file: {xgb_path}")
+
+    lr_df = pd.read_csv(lr_path)
+    xgb_df = pd.read_csv(xgb_path)
+
+    lr_err = (lr_df["actual_team_score"] - lr_df["predicted_team_xPts"]).abs().dropna().values
+    xgb_err = (xgb_df["actual_team_score"] - xgb_df["predicted_team_xPts"]).abs().dropna().values
+
+    def ecdf(values):
+        x = np.sort(values)
+        y = np.arange(1, len(x) + 1) / len(x)
+        return x, y
+
+    lr_x, lr_y = ecdf(lr_err)
+    xgb_x, xgb_y = ecdf(xgb_err)
+
+    plt.figure(figsize=(8.5, 5.8))
+    plt.plot(lr_x, lr_y, marker="o", markevery=max(len(lr_x)//10, 1), linewidth=2, label="Linear Regression")
+    plt.plot(xgb_x, xgb_y, marker="o", markevery=max(len(xgb_x)//10, 1), linewidth=2, label="XGBoost")
+
+    plt.xlabel("Weekly absolute team prediction error")
+    plt.ylabel("Proportion of gameweeks")
+    plt.title(f"Cumulative Weekly Error Distribution — {season}")
+    plt.figtext(
+        0.5, 0.01,
+        "Higher and further left is better.",
+        ha="center",
+        fontsize=10
+    )
+
+    # 右边放一个小 summary
+    lr_mean = lr_err.mean()
+    xgb_mean = xgb_err.mean()
+    lr_median = np.median(lr_err)
+    xgb_median = np.median(xgb_err)
+
+    summary_text = (
+        f"Linear: mean={lr_mean:.1f}, median={lr_median:.1f}\n"
+        f"XGBoost: mean={xgb_mean:.1f}, median={xgb_median:.1f}"
+    )
+    plt.text(
+        0.98, 0.08,
+        summary_text,
+        transform=plt.gca().transAxes,
+        ha="right",
+        va="bottom",
+        bbox=dict(boxstyle="round,pad=0.3", facecolor="white", alpha=0.85)
+    )
+
+    plt.grid(True, linestyle="--", alpha=0.35)
+    plt.legend()
+    plt.tight_layout()
+
+    save_path = os.path.join(save_dir, f"error_ecdf_{season}_budget_{budget_tag}.png")
+    plt.savefig(save_path, dpi=240, bbox_inches="tight")
+    plt.close()
+
+    print(f"Saved ECDF plot to: {save_path}")
+    return save_path
 
 # =========================================================
 # EXAMPLES
@@ -1078,5 +1281,11 @@ def compare_models_over_season(season, budget=None):
 # 7. Shorter range example
 # compare_season_performance("linear", season="2024-25", start_gw=1, end_gw=10, budget=83)
 
-if RUN_BEST_XI_ANALYSIS:
-    compare_models_over_season(season="2024-25", budget=83)
+#if RUN_BEST_XI_ANALYSIS:
+#   compare_models_over_season(season="2024-25", budget=83)
+
+# Plot 3 models
+# plot_points_left_boxplot(season="2024-25", budget=83)
+
+#plot_team_error_boxplot_from_gw_summary(season="2024-25", budget=83)
+plot_error_ecdf_from_gw_summary(season="2024-25", budget=83)
