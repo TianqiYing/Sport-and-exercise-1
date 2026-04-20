@@ -1,0 +1,13 @@
+=SUM(B16,GW2_Consistent!B16,GW3_Consistent!B16,GW4_Consistent!B16,GW5_Consistent!B16,GW6_Consistent!B16,GW7_Consistent!B16,GW8_Consistent!B16,GW9_Consistent!B16,GW10_Consistent!B16,GW11_Consistent!B16,GW12_Consistent!B16,GW13_Consistent!B16,GW14_Consistent!B16,GW15_Consistent!B16,GW16_Consistent!B16,GW18_Consistent!B16,GW19_Consistent!B16,GW20_Consistent!B16,GW21_Consistent!B16,GW22_Consistent!B16,GW23_Consistent!B16,GW24_Consistent!B16,GW25_Consistent!B16,GW26_Consistent!B16,GW27_Consistent!B16,GW28_Consistent!B16,GW29_Consistent!B16,GW30_Consistent!B16,GW31_Consistent!B16,GW32_Consistent!B16,GW33_Consistent!B16,GW34_Consistent!B16,GW35_Consistent!B16,GW36_Consistent!B16,GW37_Consistent!B16,GW38_Consistent!B16)
+
+=SUM(B16,GW2_Risky!B16,GW3_Risky!B16,GW4_Risky!B16,GW5_Risky!B16,GW6_Risky!B16,GW7_Risky!B16,GW8_Risky!B16,GW9_Risky!B16,GW10_Risky!B16,GW11_Risky!B16,GW12_Risky!B16,GW13_Risky!B16,GW14_Risky!B16,GW15_Risky!B16,GW16_Risky!B16,GW18_Risky!B16,GW19_Risky!B16,GW20_Risky!B16,GW21_Risky!B16,GW22_Risky!B16,GW23_Risky!B16,GW24_Risky!B16,GW25_Risky!B16,GW26_Risky!B16,GW27_Risky!B16,GW28_Risky!B16,GW29_Risky!B16,GW30_Risky!B16,GW31_Risky!B16,GW32_Risky!B16,GW33_Risky!B16,GW34_Risky!B16,GW35_Risky!B16,GW36_Risky!B16,GW37_Risky!B16,GW38_Risky!B16)
+
+
+
+
+
+
+
+=SUM(D15,GW2_Consistent!D15,GW3_Consistent!D15,GW4_Consistent!D15,GW5_Consistent!D15,GW6_Consistent!D15,GW7_Consistent!D15,GW8_Consistent!D15,GW9_Consistent!D15,GW10_Consistent!D15,GW11_Consistent!D15,GW12_Consistent!D15,GW13_Consistent!D15,GW14_Consistent!D15,GW15_Consistent!D15,GW16_Consistent!D15,GW18_Consistent!D15,GW19_Consistent!D15,GW20_Consistent!D15,GW21_Consistent!D15,GW22_Consistent!D15,GW23_Consistent!D15,GW24_Consistent!D15,GW25_Consistent!D15,GW26_Consistent!D15,GW27_Consistent!D15,GW28_Consistent!D15,GW29_Consistent!D15,GW30_Consistent!D15,GW31_Consistent!D15,GW32_Consistent!D15,GW33_Consistent!D15,GW34_Consistent!D15,GW35_Consistent!D15,GW36_Consistent!D15,GW37_Consistent!D15,GW38_Consistent!D15)
+
+=SUM(GW1_Risky!D15,GW2_Risky!D15,GW3_Risky!D15,GW4_Risky!D15,GW5_Risky!D15,GW6_Risky!D15,GW7_Risky!D15,GW8_Risky!D15,GW9_Risky!D15,GW10_Risky!D15,GW11_Risky!D15,GW12_Risky!D15,GW13_Risky!D15,GW14_Risky!D15,GW15_Risky!D15,GW16_Risky!D15,GW18_Risky!D15,GW19_Risky!D15,GW20_Risky!D15,GW21_Risky!D15,GW22_Risky!D15,GW23_Risky!D15,GW24_Risky!D15,GW25_Risky!D15,GW26_Risky!D15,GW27_Risky!D15,GW28_Risky!D15,GW29_Risky!D15,GW30_Risky!D15,GW31_Risky!D15,GW32_Risky!D15,GW33_Risky!D15,GW34_Risky!D15,GW35_Risky!D15,GW36_Risky!D15,GW37_Risky!D15,GW38_Risky!D15)
