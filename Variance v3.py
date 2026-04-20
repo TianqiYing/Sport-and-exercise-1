@@ -13,12 +13,12 @@ SEASON = "2024-25"
 PREV_SEASON = "2023-24"
 TARGET_GW = 38
 BUDGET = 830
-FORM_WINDOW = 5
-EWMA_ALPHA = 0.35
+FORM_WINDOW = 3
+EWMA_ALPHA = 0.1
 
 constraints = {"GK":1, "DEF":4, "MID":4, "FWD":2}
 MAX_PER_TEAM = 3
-MC_ITER = 10000
+MC_ITER = 20000
 
 # -------------------------
 # LOAD DATA (WITH PREVIOUS SEASON)
@@ -134,7 +134,7 @@ train_df = df[
 X = train_df[features].fillna(0)
 y = train_df["total_points"]
 
-model = RandomForestRegressor(n_estimators=200, random_state=42)
+model = RandomForestRegressor(n_estimators=300, random_state=42)
 model.fit(X, y)
 
 # -------------------------
@@ -157,11 +157,11 @@ def select_team(data, mode="consistent"):
     df_sim = data.copy()
 
     if mode == "consistent":
-        df_sim["score"] = df_sim["sim_mean"] / (1 + df_sim["sim_std"])
+        df_sim["score"] = 2* df_sim["sim_mean"] / (1 + df_sim["sim_std"])
     else:
-        df_sim["score"] = df_sim["sim_mean"] * (10 + df_sim["sim_std"])
+        df_sim["score"] = 2* df_sim["sim_mean"] * (1 + df_sim["sim_std"])
 
-    df_sim["value_metric"] = df_sim["score"] / df_sim["price"]
+    df_sim["value_metric"] = df_sim["score"] / 0.5 * df_sim["price"]
 
     selected = []
     budget = BUDGET
@@ -211,9 +211,11 @@ def print_team(team, title):
 
     print("\nTotal Price:", team["price"].sum())
     print("Total Expected Points:", team["sim_mean"].sum())
+    print("Actual Points", team["total_points"].sum())
 
 print_team(consistent_team, "Consistent Team")
 print_team(risky_team, "Risky Team")
+
 
 # -------------------------
 # MODEL EVALUATION
@@ -257,13 +259,13 @@ x_vals = np.linspace(
 def plot_team(team, color):
     for _, row in team.iterrows():
         mean = row["sim_mean"]
-        std = max(row["sim_std"], 0.1)
+        std = max(row["sim_std"], 0.4)
         pdf = stats.norm.pdf(x_vals, mean, std)
         plt.plot(x_vals, pdf, linestyle="--", alpha=0.5, color=color)
 
     for _, row in team.iterrows():
         mean = row["sim_mean"]
-        std = max(row["sim_std"], 0.1)
+        std = max(row["sim_std"], 0.4)
         peak_y = stats.norm.pdf(mean, mean, std)
         plt.text(mean, peak_y, row["player"], rotation=45, ha="left", va="bottom", fontsize=8, color=color)
 
