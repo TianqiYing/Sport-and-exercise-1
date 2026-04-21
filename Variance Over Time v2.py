@@ -24,7 +24,7 @@ MC_ITER = 20000
 
 GRAPH_START_GW = 1
 GRAPH_END_GW = 38
-
+GWs = GRAPH_END_GW - GRAPH_START_GW + 1
 df = pd.read_csv("active_perfect_understat_enhanced.csv", encoding="latin1", low_memory=False)
 
 df = df[
@@ -177,13 +177,14 @@ def run_full_backtest(start_gw=1, end_gw=38):
         mae = errors.abs().mean()
         bias = errors.mean()
 
-        pred_avg = team["sim_mean"].mean()
-        act_avg = team["total_points"].fillna(0).mean()
+        pred_avg = team["sim_mean"].sum()
+        act_avg = team["total_points"].fillna(0).sum()
 
         return pred_avg, act_avg, mae, bias
 
     base_df = df.copy()
-
+    season_cons_abs = 0
+    season_risk_abs = 0
     for gw in range(start_gw, end_gw + 1):
 
         train = base_df[
@@ -234,6 +235,9 @@ def run_full_backtest(start_gw=1, end_gw=38):
         cp, ca, cmae, cbias = score(cons_team)
         rp, ra, rmae, rbias = score(risk_team)
 
+        season_cons_abs += abs(cp - ca)
+        season_risk_abs += abs(rp - ra)
+
         results.append({
             "GW": gw,
             "cons_pred": cp,
@@ -267,8 +271,8 @@ def run_full_backtest(start_gw=1, end_gw=38):
     total_cons_expected = summary_df["cons_expected_points"].sum()
     total_risk_expected = summary_df["risk_expected_points"].sum()
 
-    diff_cons_points = abs(total_cons_points - total_cons_expected) /38
-    diff_risk_points = abs(total_risk_points - total_risk_expected) /38
+    abs_error_cons = season_cons_abs / GWs
+    abs_error_risk = season_risk_abs / GWs
 
     avg_cons_mae = summary_df["cons_mae"].mean()
     avg_risk_mae = summary_df["risk_mae"].mean()
@@ -288,7 +292,7 @@ def run_full_backtest(start_gw=1, end_gw=38):
     ws.append(["Metric", "Consistent", "Risky"])
     ws.append(["Total Points", total_cons_points, total_risk_points])
     ws.append(["Predicted Points", total_cons_expected, total_risk_expected])
-    ws.append(["Difference",diff_cons_points , diff_risk_points])
+    ws.append(["Difference", abs_error_cons, abs_error_risk])
     ws.append(["Average MAE", avg_cons_mae, avg_risk_mae])
 
     ws.append([])
@@ -302,6 +306,9 @@ def run_full_backtest(start_gw=1, end_gw=38):
             row["total_points"],
             row["abs_error"]
         ])
+    summary_ws = wb["Summary"]
+    wb._sheets.remove(summary_ws)
+    wb._sheets.insert(0, summary_ws)
 
     wb.save("FPL_All_Gameweek_Teams.xlsx")
 
