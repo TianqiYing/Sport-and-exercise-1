@@ -168,6 +168,9 @@ def run_full_backtest(start_gw=1, end_gw=38):
 
     results = []
 
+    summary_rows = []
+    all_players = []
+
     def score(team):
         errors = team["sim_mean"] - team["total_points"].fillna(0)
 
@@ -208,6 +211,14 @@ def run_full_backtest(start_gw=1, end_gw=38):
         cons_team = select_team(test, "consistent")
         risk_team = select_team(test, "risky")
 
+        cons_team["mode"] = "Consistent"
+        risk_team["mode"] = "Risky"
+        cons_team["GW"] = gw
+        risk_team["GW"] = gw
+
+        all_players.append(cons_team.copy())
+        all_players.append(risk_team.copy())
+
         print("\nGW", gw)
 
         print("\nCONSISTENT TEAM")
@@ -235,8 +246,62 @@ def run_full_backtest(start_gw=1, end_gw=38):
             "risk_bias": rbias
         })
 
+        summary_rows.append({
+            "GW": gw,
+            "cons_points": cons_team["total_points"].fillna(0).sum(),
+            "risk_points": risk_team["total_points"].fillna(0).sum(),
+            "cons_expected_points": cons_team["sim_mean"].sum(),
+            "risk_expected_points": risk_team["sim_mean"].sum(),
+            "cons_mae": cmae,
+            "risk_mae": rmae
+        })
+
         write_team_sheet(wb, cons_team, f"GW{gw}_Consistent")
         write_team_sheet(wb, risk_team, f"GW{gw}_Risky")
+
+    summary_df = pd.DataFrame(summary_rows)
+
+    total_cons_points = summary_df["cons_points"].sum()
+    total_risk_points = summary_df["risk_points"].sum()
+
+    total_cons_expected = summary_df["cons_expected_points"].sum()
+    total_risk_expected = summary_df["risk_expected_points"].sum()
+
+    diff_cons_points = abs(total_cons_points - total_cons_expected) /38
+    diff_risk_points = abs(total_risk_points - total_risk_expected) /38
+
+    avg_cons_mae = summary_df["cons_mae"].mean()
+    avg_risk_mae = summary_df["risk_mae"].mean()
+
+    players_df = pd.concat(all_players)
+
+    players_df["error"] = players_df["sim_mean"] - players_df["total_points"].fillna(0)
+    players_df["abs_error"] = players_df["error"].abs()
+
+    pos_summary = players_df.groupby(["mode", "position_mapped"]).agg({
+        "total_points": "sum",
+        "abs_error": "mean"
+    }).reset_index()
+
+    ws = wb.create_sheet(title="Summary")
+
+    ws.append(["Metric", "Consistent", "Risky"])
+    ws.append(["Total Points", total_cons_points, total_risk_points])
+    ws.append(["Predicted Points", total_cons_expected, total_risk_expected])
+    ws.append(["Difference",diff_cons_points , diff_risk_points])
+    ws.append(["Average MAE", avg_cons_mae, avg_risk_mae])
+
+    ws.append([])
+    ws.append(["Position Breakdown"])
+    ws.append(["Mode", "Position", "Total Points", "Avg MAE"])
+
+    for _, row in pos_summary.iterrows():
+        ws.append([
+            row["mode"],
+            row["position_mapped"],
+            row["total_points"],
+            row["abs_error"]
+        ])
 
     wb.save("FPL_All_Gameweek_Teams.xlsx")
 
@@ -260,25 +325,20 @@ plt.show()
 plt.figure()
 plt.plot(plot_df["GW"], plot_df["cons_mae"], label="Cons MAE")
 plt.plot(plot_df["GW"], plot_df["risk_mae"], label="Risk MAE")
-plt.axhline(0)
 plt.legend()
 plt.show()
 
 plt.figure()
-
 plot_df["cons_mae"] = plot_df["cons_mae"].rolling(ROLLING_WINDOW).mean()
 plot_df["risk_mae"] = plot_df["risk_mae"].rolling(ROLLING_WINDOW).mean()
-
 plt.plot(plot_df["GW"], plot_df["cons_mae"], label="Cons MAE Smoothed")
 plt.plot(plot_df["GW"], plot_df["risk_mae"], label="Risk MAE Smoothed")
 plt.legend()
 plt.show()
 
 plt.figure()
-
 plot_df["cons_bias"] = plot_df["cons_bias"].rolling(ROLLING_WINDOW).mean()
 plot_df["risk_bias"] = plot_df["risk_bias"].rolling(ROLLING_WINDOW).mean()
-
 plt.plot(plot_df["GW"], plot_df["cons_bias"], label="Cons Bias")
 plt.plot(plot_df["GW"], plot_df["risk_bias"], label="Risk Bias")
 plt.axhline(0)
