@@ -988,6 +988,51 @@ def compare_season_performance(model_key, season, start_gw=1, end_gw=38, budget=
 
     return result_df
 
+def calc_rmae_for_model(model_key, season, gameweeks=None, by_position=True):
+    pred_df = load_prediction_file(model_key).copy()
+
+    pred_df = pred_df[pred_df["season_x"] == season].copy()
+
+    if gameweeks is not None:
+        pred_df = pred_df[pred_df["gameweek"].isin(gameweeks)].copy()
+
+    pred_df = pred_df.dropna(
+        subset=["player", "FPL_pos", "gameweek", "xPts", "total_points"]
+    ).copy()
+
+    if len(pred_df) == 0:
+        return np.nan
+
+    # Aggregate to one player per gameweek
+    rank_df = (
+        pred_df
+        .groupby(["season_x", "gameweek", "player", "FPL_pos"], as_index=False)
+        .agg(
+            xPts=("xPts", "sum"),
+            total_points=("total_points", "sum")
+        )
+    )
+
+    if by_position:
+        group_cols = ["season_x", "gameweek", "FPL_pos"]
+    else:
+        group_cols = ["season_x", "gameweek"]
+
+    rank_df["pred_rank"] = (
+        rank_df.groupby(group_cols)["xPts"]
+        .rank(ascending=False, method="average")
+    )
+
+    rank_df["actual_rank"] = (
+        rank_df.groupby(group_cols)["total_points"]
+        .rank(ascending=False, method="average")
+    )
+
+    rank_df["rank_error"] = (
+        rank_df["pred_rank"] - rank_df["actual_rank"]
+    ).abs()
+
+    return rank_df["rank_error"].mean()
 
 def compare_models_over_season(season, budget=None):
     all_results = []
@@ -1010,6 +1055,27 @@ def compare_models_over_season(season, budget=None):
             result_df["predicted_team_xPts"]
         )
 
+        error_df = result_df.copy()
+
+        error_df["signed_error"] = (
+                error_df["predicted_team_xPts"] - error_df["actual_team_score"]
+        )
+
+        error_df["abs_error"] = error_df["signed_error"].abs()
+
+        closest_row = error_df.loc[error_df["abs_error"].idxmin()]
+        worst_row = error_df.loc[error_df["abs_error"].idxmax()]
+
+        bias = error_df["signed_error"].mean()
+        within_10pts_pct = (error_df["abs_error"] <= 10).mean() * 100
+
+        rmae = calc_rmae_for_model(
+            model_key=model_key,
+            season=season,
+            gameweeks=result_df["gameweek"].tolist(),
+            by_position=True
+        )
+
         all_results.append({
             "model": model_key,
             "season": season,
@@ -1020,7 +1086,21 @@ def compare_models_over_season(season, budget=None):
             "total_actual_team_score": round(result_df["actual_team_score"].sum(), 3),
             "gw_mae": round(gw_mae, 3),
             "gw_rmse": round(gw_rmse, 3),
-            "gw_corr": round(gw_corr, 3)
+            "gw_corr": round(gw_corr, 3),
+            "rmae": round(rmae, 3),
+
+            "bias_pred_minus_actual": round(bias, 3),
+            "within_10pts_pct": round(within_10pts_pct, 1),
+
+            "closest_gw": int(closest_row["gameweek"]),
+            "closest_error": round(closest_row["abs_error"], 3),
+            "closest_predicted_xPts": round(closest_row["predicted_team_xPts"], 3),
+            "closest_actual_score": round(closest_row["actual_team_score"], 3),
+
+            "worst_gw": int(worst_row["gameweek"]),
+            "worst_error": round(worst_row["abs_error"], 3),
+            "worst_predicted_xPts": round(worst_row["predicted_team_xPts"], 3),
+            "worst_actual_score": round(worst_row["actual_team_score"], 3),
         })
 
     if len(all_results) == 0:
@@ -1045,6 +1125,7 @@ def compare_models_over_season(season, budget=None):
     print(f"\nSaved comparison to: {save_path}")
 
     return comparison_df
+
 
 # =========================================================
 # Plot
